@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { allKana, kanaGroups, pairKana, shuffle } from './data'
-import { finish, progressBadges, questionCount, resultStars } from './App'
+import { finish, progressBadges, questionCount, resultStars, stageStatus } from './App'
 import { emptyProgress } from './storage'
 
 describe('もんだいでーた', () => {
@@ -51,5 +51,11 @@ describe('きろく', () => {
   it('ほーむに ほしと すぴーどの きろくを まとめる', () => {
     const progress = finish(emptyProgress(), {level:1,set:'あ',random:false,mode:'challenge'}, {misses:0,seconds:8})
     expect(progressBadges(progress)).toEqual({noMiss:1, speed:1})
+  })
+  it('えらんだ もんだいの くりあと ほしを だせる', () => {
+    const choice = {level:1 as const,set:'あ',random:false,mode:'challenge' as const}
+    const progress = finish(emptyProgress(), choice, {misses:0,seconds:8})
+    expect(stageStatus(progress, choice)).toEqual({completed:true, noMiss:true, speed:true, bestTime:undefined})
+    expect(stageStatus(progress, {...choice, set:'か'})).toEqual({completed:false, noMiss:false, speed:false, bestTime:undefined})
   })
 })
