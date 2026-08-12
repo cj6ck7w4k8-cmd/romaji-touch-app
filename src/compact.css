@@ -1,0 +1,22 @@
+/* The list is for looking up an answer, not for answering. Keeping all ten
+   kana columns on one row lets it stay visible without scrolling. */
+.kana-chart { grid-template-columns: repeat(10, minmax(0, 1fr)); }
+
+@media (max-width: 720px) {
+  .home-art { min-height: 80px; max-height: 80px; }
+  .home-art .character { transform: scale(.42); transform-origin:bottom center; }
+  .kana-chart { grid-template-columns: repeat(10, minmax(0, 1fr)); padding: 6px; gap: 2px; }
+  .kana-column { gap: 3px; }
+  .column-label { font-size: 9px; }
+  .kana-column button { padding: 3px 1px; }
+  .kana-column b { font-size: 14px; }
+  .kana-column span { font-size: 8px; }
+}
+
+@media (max-height: 400px) {
+  .app-shell { zoom: .57; width: 175.439%; height: 175.439dvh; }
+  .game-page { zoom: .57; width: 175.439%; min-height: 175.439dvh; }
+  .content-page, .result-page { height: calc(175.439dvh - 88px); }
+  .home-page { min-height: calc(175.439dvh - 88px); max-height: calc(175.439dvh - 88px); }
+  .home-art { display: none; }
+}
