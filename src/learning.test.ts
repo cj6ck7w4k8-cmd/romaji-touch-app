@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { allKana, kanaGroups, pairKana, shuffle } from './data'
-import { finish } from './App'
+import { finish, questionCount, resultStars } from './App'
 import { emptyProgress } from './storage'
 
 describe('もんだいでーた', () => {
@@ -34,5 +34,18 @@ describe('きろく', () => {
   it('ほんばんで まちがえたら のーみすのほしを つけない', () => {
     const progress = finish(emptyProgress(), {level:1,set:'あ',random:false,mode:'challenge'}, {misses:1,seconds:8})
     expect(progress.stars['1-あ-normal']).toEqual(['speed'])
+  })
+  it('けっかがめんには こんかい とれた ほしだけを だす', () => {
+    const choice = {level:1 as const,set:'あ',random:false,mode:'challenge' as const}
+    expect(resultStars(choice, {misses:1,seconds:8})).toEqual(['speed'])
+    expect(resultStars({...choice, mode:'practice'}, {misses:0,seconds:1})).toEqual([])
+  })
+  it('けっかがめんの もんすうは えらんだ はんいと おなじ', () => {
+    expect(questionCount({level:1,set:'や',random:false,mode:'challenge'})).toBe(3)
+    expect(questionCount({level:2,set:'あか',random:false,mode:'challenge'})).toBe(10)
+    expect(questionCount({level:3,set:'all',random:false,mode:'challenge'})).toBe(allKana.length)
+  })
+  it('れべる3の けっかには すぴーどのほしを ださない', () => {
+    expect(resultStars({level:3,set:'all',random:false,mode:'challenge'}, {misses:0,seconds:1})).toEqual(['no-miss'])
   })
 })
