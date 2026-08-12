@@ -7,7 +7,6 @@ type Level = 1 | 2 | 3
 type Mode = 'practice' | 'challenge'
 export type Choice = { level: Level; set: string; random: boolean; mode: Mode }
 type GameResult = { misses: number; seconds: number }
-const labels: Record<Level, string> = { 1: '1つずつ おぼえよう', 2: '2つ つづけて しょうぶ', 3: 'ぜんぶの もじ' }
 const id = (c: Choice) => `${c.level}-${c.set}-${c.random ? 'random' : 'normal'}`
 
 export function App() {
@@ -25,7 +24,7 @@ export function App() {
   if (view === 'game' && choice) return <Game choice={choice} back={() => nav('select')} finish={(result) => { setProgress(p => finish(p, choice, result)); setLastResult(result); nav('result') }} />
   return <main className="app-shell">
     <header className="topbar"><button className="brand" onClick={() => nav('home')} aria-label="ほーむへ"><span className="brand-mark">★</span><span>ろーまじ<br /><b>ますたー</b></span></button><nav><button className={view === 'book' ? 'nav-link active' : 'nav-link'} onClick={() => nav('book')}>いちらん</button><button className={view === 'record' ? 'nav-link active' : 'nav-link'} onClick={() => nav('record')}>きろく</button></nav></header>
-    {view === 'home' && <Home onPlay={() => nav('select')} onHint={() => nav('book')} />}
+    {view === 'home' && <Home progress={progress} onPlay={() => nav('select')} onHint={() => nav('book')} onRecord={() => nav('record')} />}
     {view === 'select' && <Select level2Open={level2Open} level3Open={level3Open} randomOpen={randomOpen} onBack={() => nav('home')} onSelect={select} />}
     {view === 'result' && choice && lastResult && <Result choice={choice} result={lastResult} onRetry={() => nav('game')} onSelect={() => nav('select')} onRecord={() => nav('record')} />}
     {view === 'book' && <Book onBack={() => nav('home')} />}
@@ -33,16 +32,23 @@ export function App() {
   </main>
 }
 
-function Home({ onPlay, onHint }: { onPlay: () => void; onHint: () => void }) {
-  return <section className="home-page"><div className="home-copy"><div className="sparkle sparkle-one">✦</div><div className="sparkle sparkle-two">✦</div><p className="eyebrow">たのしく まなぼう</p><h1>ろーまじを<br /><span>たのしく おぼえよう！</span></h1><p className="lead">ひらがなを みて、ろーまじを<br />タップで えらんでみよう。</p><button className="primary-button" onClick={onPlay}>あそぶ <span>→</span></button><button className="text-button" onClick={onHint}>いちらんを みる</button></div><div className="home-art" aria-hidden="true"><div className="sun">☀</div><div className="cloud cloud-a" /><div className="cloud cloud-b" /><div className="hill hill-back" /><div className="hill hill-front" /><div className="character"><div className="character-face"><i /><i /><span>⌣</span></div><div className="character-body" /></div><div className="floating-kana kana-a">あ</div><div className="floating-kana kana-ka">か</div></div><div className="home-footer"><span>★ じぶんの ペースで すすめよう</span><span>データは この たんまつに ほぞん</span></div></section>
+function Home({ progress, onPlay, onHint, onRecord }: { progress: Progress; onPlay: () => void; onHint: () => void; onRecord: () => void }) {
+  const badges = progressBadges(progress)
+  return <section className="home-page"><div className="home-copy"><div className="sparkle sparkle-one">✦</div><div className="sparkle sparkle-two">✦</div><p className="eyebrow">たのしく まなぼう</p><h1>ろーまじを<br /><span>たのしく おぼえよう！</span></h1><p className="lead">ひらがなを みて、ろーまじを<br />タップで えらんでみよう。</p><button className="primary-button" onClick={onPlay}>あそぶ <span>→</span></button><button className="text-button" onClick={onHint}>いちらんを みる</button><button className="home-record" onClick={onRecord}><span className="home-record-title">きみの きろく</span><span className="home-record-stats"><strong>{progress.completed.length}</strong><span>くりあした もんだい</span><b>★ {badges.noMiss}</b><b>⚡ {badges.speed}</b></span><span className="home-record-help">★ まちがえなし　⚡ はやくできた　くわしく みる →</span></button></div><div className="home-art" aria-hidden="true"><div className="sun">☀</div><div className="cloud cloud-a" /><div className="cloud cloud-b" /><div className="hill hill-back" /><div className="hill hill-front" /><div className="character"><div className="character-face"><i /><i /><span>⌣</span></div><div className="character-body" /></div><div className="floating-kana kana-a">あ</div><div className="floating-kana kana-ka">か</div></div><div className="home-footer"><span>★ じぶんの ペースで すすめよう</span><span>データは この たんまつに ほぞん</span></div></section>
 }
 
 function Select({ level2Open, level3Open, randomOpen, onBack, onSelect }: { level2Open: boolean; level3Open: boolean; randomOpen: boolean; onBack: () => void; onSelect: (level: Level, set: string, random?: boolean, mode?: Mode) => void }) {
   const [mode, setMode] = useState<Mode>('challenge')
-  return <section className="content-page"><button className="back-button" onClick={onBack}>← もどる</button><div className="page-heading"><p className="eyebrow">すてっぷ 1</p><h2>れべるを えらぼう</h2><p>できそうな ところから はじめよう。</p></div><div className="mode-choice" aria-label="もーどを えらぶ"><span>もーど</span><button className={mode === 'practice' ? 'selected' : ''} onClick={() => setMode('practice')}>れんしゅう</button><button className={mode === 'challenge' ? 'selected' : ''} onClick={() => setMode('challenge')}>ほんばん</button></div><div className="level-list"><LevelCard number="01" text={labels[1]} note="あ・か・さ… 1つの ぎょう" open onClick={() => onSelect(1, groupNames[0], false, mode)} /><LevelCard number="02" text={labels[2]} note="2つの ぎょうを つづけて" open={level2Open} onClick={() => onSelect(2, pairs[0], false, mode)} /><LevelCard number="03" text={labels[3]} note="あ〜んを ぜんぶ" open={level3Open} onClick={() => onSelect(3, 'all', false, mode)} /></div><div className="sets-panel"><h3>もんだいを えらぶ</h3><div className="set-row">{groupNames.map(g => <button key={g} onClick={() => onSelect(1, g, false, mode)}>{g}</button>)}</div><div className="set-row secondary">{pairs.map(p => <button disabled={!level2Open} key={p} onClick={() => onSelect(2, p, false, mode)}>{p.split('').join('・')}</button>)}</div><div className="set-row wide"><button disabled={!level3Open} onClick={() => onSelect(3, 'all', false, mode)}>じゅんばん</button><button disabled={!randomOpen} onClick={() => onSelect(3, 'all', true, mode)}>らんだむ</button></div></div></section>
+  const [level, setLevel] = useState<Level>(1)
+  const [set, setSet] = useState(groupNames[0])
+  const [random, setRandom] = useState(false)
+  const chooseLevel = (next: Level) => { if (next === 2 && !level2Open || next === 3 && !level3Open) return; setLevel(next); setSet(next === 1 ? groupNames[0] : next === 2 ? pairs[0] : 'all'); setRandom(false) }
+  const choices = level === 1 ? groupNames : level === 2 ? pairs : ['じゅんばん', 'らんだむ']
+  const chooseSet = (value: string) => { if (level === 3) { if (value === 'らんだむ' && !randomOpen) return; setRandom(value === 'らんだむ'); setSet('all'); return } setSet(value) }
+  const startLabel = level === 1 ? `${set}ぎょうで` : level === 2 ? `${set.split('').join('・')}で` : random ? 'らんだむで' : 'じゅんばんで'
+  const unlockNote = !level2Open ? '2れべるは、1れべるを ほんばんで ぜんぶ くりあすると できるよ。' : !level3Open ? '3れべるは、2れべるを ほんばんで ぜんぶ くりあすると できるよ。' : ''
+  return <section className="content-page select-page"><button className="back-button" onClick={onBack}>← もどる</button><div className="page-heading compact-heading"><h2>もんだいを えらぼう</h2><p>えらんだら すたーとを おしてね。</p></div><div className="choice-box"><div className="choice-row"><span>もーど</span><div className="mode-choice" aria-label="もーどを えらぶ"><button className={mode === 'practice' ? 'selected' : ''} onClick={() => setMode('practice')}>れんしゅう</button><button className={mode === 'challenge' ? 'selected' : ''} onClick={() => setMode('challenge')}>ほんばん</button></div></div><div className="choice-row"><span>れべる</span><div className="level-picks"><button className={level === 1 ? 'selected' : ''} onClick={() => chooseLevel(1)}>1</button><button disabled={!level2Open} className={level === 2 ? 'selected' : ''} onClick={() => chooseLevel(2)}>2</button><button disabled={!level3Open} className={level === 3 ? 'selected' : ''} onClick={() => chooseLevel(3)}>3</button></div></div>{unlockNote && <p className="unlock-note">{unlockNote}</p>}<div className="choice-row range-row"><span>{level === 1 ? 'ぎょう' : level === 2 ? 'くみ' : 'ならびかた'}</span><div className="range-picks">{choices.map(value => <button disabled={level === 3 && value === 'らんだむ' && !randomOpen} className={(level < 3 ? set === value : random === (value === 'らんだむ')) ? 'selected' : ''} key={value} onClick={() => chooseSet(value)}>{level === 2 ? value.split('').join('・') : value}</button>)}</div></div><button className="start-button" onClick={() => onSelect(level, set, random, mode)}>{level} れべる　{startLabel}　すたーと →</button></div></section>
 }
-
-function LevelCard({ number, text, note, open, onClick }: { number: string; text: string; note: string; open: boolean; onClick: () => void }) { return <button className={`level-card ${open ? '' : 'locked'}`} disabled={!open} onClick={onClick}><span className="level-number">{number}</span><span className="level-info"><strong>{open ? text : 'まだ あそべないよ'}</strong><small>{open ? note : 'まえの れべるを くりあしてね'}</small></span><span className="level-arrow">{open ? '→' : '🔒'}</span></button> }
 
 function Game({ choice, back, finish }: { choice: Choice; back: () => void; finish: (result: GameResult) => void }) {
   const questions = useMemo(() => { const source: Kana[] = choice.level === 1 ? kanaGroups[choice.set] : choice.level === 2 ? pairKana(choice.set) : allKana; return choice.random ? shuffle(source) : source }, [choice])
@@ -65,6 +71,11 @@ export function resultStars(choice: Choice, result: GameResult) {
 
 export function questionCount(choice: Choice) {
   return choice.level === 1 ? kanaGroups[choice.set].length : choice.level === 2 ? pairKana(choice.set).length : allKana.length
+}
+
+export function progressBadges(progress: Progress) {
+  const values = Object.values(progress.stars)
+  return { noMiss: values.filter(stars => stars.includes('no-miss')).length, speed: values.filter(stars => stars.includes('speed')).length }
 }
 
 function Result({ choice, result, onRetry, onSelect, onRecord }: { choice: Choice; result: GameResult; onRetry: () => void; onSelect: () => void; onRecord: () => void }) {
