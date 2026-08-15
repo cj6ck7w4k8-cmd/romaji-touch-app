@@ -1,8 +1,18 @@
 /* The list is for looking up an answer, not for answering. Keeping all ten
    kana columns on one row lets it stay visible without scrolling. */
 .kana-chart { grid-template-columns: repeat(10, minmax(0, 1fr)); }
+.level-row .level-picks { flex: 0 0 auto; }
+.level-row .unlock-note { flex: 1 1 auto; min-width: 0; margin: 0; padding: 0; }
+.earned-stars .badge-slot { position: relative; justify-content:space-between; min-height: 92px; padding: 9px 12px; border: 2px dashed #cbd8d4; background: #f7faf8; color: #cbd8d4; box-shadow: inset 0 -5px 0 #e4ece8; }
+.earned-stars .badge-slot i { display:grid; place-items:center; width:42px; height:42px; margin:auto; border-radius:50%; background:#e6eeea; color:#c1d0ca; font-style:normal; }
+.earned-stars .badge-slot.earned { border-style: solid; border-color:#f0c356; background:#fff4d7; color:#e7ae27; box-shadow: inset 0 -5px 0 #ffe7aa; }
+.earned-stars .badge-slot.earned i { background:#ffcf58; color:#fff; box-shadow:0 3px 0 #eebd45; }
 
 @media (max-width: 720px) {
+  .level-row { align-items: center; }
+  .level-row .unlock-note { font-size: 9px; line-height: 1.3; }
+  .earned-stars .badge-slot { min-height: 78px; padding: 7px 8px; }
+  .earned-stars .badge-slot i { width:34px; height:34px; }
   .home-art { min-height: 80px; max-height: 80px; }
   .home-art .character { transform: scale(.42); transform-origin:bottom center; }
   .kana-chart { grid-template-columns: repeat(10, minmax(0, 1fr)); padding: 6px; gap: 2px; }
