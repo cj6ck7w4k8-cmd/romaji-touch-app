@@ -8,6 +8,7 @@ type Mode = 'practice' | 'challenge'
 export type Choice = { level: Level; set: string; random: boolean; mode: Mode }
 type GameResult = { misses: number; seconds: number }
 const id = (c: Choice) => `${c.level}-${c.set}-${c.random ? 'random' : 'normal'}`
+const hasAllStageBadges = (progress: Progress, key: string) => ['no-miss', 'speed'].every(badge => progress.stars[key]?.includes(badge))
 
 export function App() {
   const [view, setView] = useState<View>('home')
@@ -15,8 +16,8 @@ export function App() {
   const [choice, setChoice] = useState<Choice | null>(null)
   const [lastResult, setLastResult] = useState<GameResult | null>(null)
   useEffect(() => saveProgress(progress), [progress])
-  const level2Open = groupNames.every(g => progress.completed.includes(`1-${g}-normal`))
-  const level3Open = pairs.every(p => progress.completed.includes(`2-${p}-normal`))
+  const level2Open = groupNames.every(g => hasAllStageBadges(progress, `1-${g}-normal`))
+  const level3Open = pairs.every(p => hasAllStageBadges(progress, `2-${p}-normal`))
   const randomOpen = progress.stars['3-all-normal']?.includes('no-miss')
   const select = (level: Level, set: string, random = false, mode: Mode = 'challenge') => { setChoice({ level, set, random, mode }); setView('game') }
   const nav = (next: View) => setView(next)
@@ -87,7 +88,7 @@ export function stageStatus(progress: Progress, choice: Choice) {
 
 function StatusMarks({ status, showEmpty = false }: { status: ReturnType<typeof stageStatus>; showEmpty?: boolean }) {
   if (!showEmpty && !status.completed && !status.noMiss && !status.speed) return null
-  const badges = [{ mark: '○', earned: status.completed, label: 'クリア', kind: 'clear-badge' }, { mark: '★', earned: status.noMiss, label: 'まちがえなし', kind: 'no-miss-badge' }, { mark: '⚡', earned: status.speed, label: 'はやくできた', kind: 'speed-badge' }]
+  const badges = [{ mark: '★', earned: status.noMiss, label: 'まちがえなし', kind: 'no-miss-badge' }, { mark: '⚡', earned: status.speed, label: 'はやくできた', kind: 'speed-badge' }]
   return <span className="status-marks" aria-label={badges.filter(badge => badge.earned).map(badge => badge.label).join('　') || 'まだ バッジがない'}>{badges.map(badge => <i className={badge.earned ? `filled ${badge.kind}` : ''} key={badge.mark} aria-hidden="true">{badge.earned ? badge.mark : ''}</i>)}{status.bestTime !== undefined && <small>{status.bestTime.toFixed(1)}びょう</small>}</span>
 }
 
