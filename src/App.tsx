@@ -25,7 +25,7 @@ export function App() {
   if (view === 'game' && choice) return <Game choice={choice} back={() => nav('select')} finish={(result) => { setProgress(p => finish(p, choice, result)); setLastResult(result); nav('result') }} />
   return <main className="app-shell">
     <header className="topbar"><button className="brand" onClick={() => nav('home')} aria-label="ほーむへ"><span className="brand-mark">★</span><span>ローマ字<br /><b>ますたー</b></span></button><nav><button className={view === 'book' ? 'nav-link active' : 'nav-link'} onClick={() => nav('book')}>いちらん</button><button className={view === 'record' ? 'nav-link active' : 'nav-link'} onClick={() => nav('record')}>きろく</button></nav></header>
-    {view === 'home' && <Home progress={progress} onPlay={() => nav('select')} onRecord={() => nav('record')} />}
+    {view === 'home' && <Home progress={progress} currentLevel={level3Open ? 3 : level2Open ? 2 : 1} onPlay={() => nav('select')} onRecord={() => nav('record')} />}
     {view === 'select' && <Select progress={progress} level2Open={level2Open} level3Open={level3Open} randomOpen={randomOpen} onBack={() => nav('home')} onSelect={select} />}
     {view === 'result' && choice && lastResult && <Result choice={choice} result={lastResult} onRetry={() => nav('game')} onSelect={() => nav('select')} onRecord={() => nav('record')} />}
     {view === 'book' && <Book onBack={() => nav('home')} />}
@@ -33,9 +33,9 @@ export function App() {
   </main>
 }
 
-function Home({ progress, onPlay, onRecord }: { progress: Progress; onPlay: () => void; onRecord: () => void }) {
+function Home({ progress, currentLevel, onPlay, onRecord }: { progress: Progress; currentLevel: Level; onPlay: () => void; onRecord: () => void }) {
   const badges = progressBadges(progress)
-  return <section className="home-page"><div className="home-copy"><h1>ローマ字を<br /><span>おぼえよう！</span></h1><p className="lead">ひらがなを みて、ローマ字を えらぼう。</p><button className="primary-button" onClick={onPlay}>あそぶ <span>→</span></button><button className="home-record" onClick={onRecord}><span className="home-record-title">きみの きろく</span><span className="home-record-stats"><strong>{progress.completed.length}</strong><span>クリアした もんだい</span><b>★ {badges.noMiss}</b><b>⚡ {badges.speed}</b></span><span className="home-record-help">くわしく みる →</span></button></div><div className="home-art romaji-lesson-art" aria-hidden="true"><div className="lesson-title">ひらがな　→　ローマ字</div><div className="lesson-card"><b>あ</b><span>→</span><strong>a</strong></div><div className="lesson-card"><b>し</b><span>→</span><strong>si</strong></div><div className="lesson-card"><b>つ</b><span>→</span><strong>tu</strong></div></div></section>
+  return <section className="home-page"><div className="home-copy"><h1>ローマ字を<br /><span>おぼえよう！</span></h1><p className="lead">ひらがなを みて、ローマ字を えらぼう。</p><button className="primary-button" onClick={onPlay}>あそぶ <span>→</span></button><button className="home-record" onClick={onRecord}><span className="home-record-title">いまの レベル</span><span className="home-record-stats"><strong>レベル{currentLevel}</strong><b>★ {badges.noMiss}</b><b>⚡ {badges.speed}</b></span><span className="home-record-help">くわしく みる →</span></button></div><div className="home-art romaji-lesson-art" aria-hidden="true"><div className="lesson-title">ひらがな　→　ローマ字</div><div className="lesson-card"><b>あ</b><span>→</span><strong>a</strong></div><div className="lesson-card"><b>し</b><span>→</span><strong>si</strong></div><div className="lesson-card"><b>つ</b><span>→</span><strong>tu</strong></div></div></section>
 }
 
 function Select({ progress, level2Open, level3Open, randomOpen, onBack, onSelect }: { progress: Progress; level2Open: boolean; level3Open: boolean; randomOpen: boolean; onBack: () => void; onSelect: (level: Level, set: string, random?: boolean, mode?: Mode) => void }) {
