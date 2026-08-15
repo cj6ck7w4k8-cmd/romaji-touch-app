@@ -6,11 +6,15 @@
 .status-marks { display: inline-flex; align-items: center; justify-content: center; gap: 3px; min-height: 16px; }
 .status-marks i { display: grid; place-items: center; width: 14px; height: 14px; border: 1px solid #bcc9c5; border-radius: 50%; background: #e4e8e6; color: transparent; font-size: 9px; font-style: normal; line-height: 1; }
 .status-marks i.filled { color: #fff; box-shadow: 0 1px 0 rgba(0, 0, 0, .16); }
-.status-marks i.clear-badge { border-color: #157b89; background: #31a5af; }
 .status-marks i.no-miss-badge { border-color: #e7ae27; background: #ffcf58; }
 .status-marks i.speed-badge { border-color: #d87942; background: #f39b66; }
 .range-picks .status-marks { gap: 2px; min-height: 14px; }
 .range-picks .status-marks i { width: 11px; height: 11px; font-size: 7px; }
+.range-picks button:has(.no-miss-badge.filled):has(.speed-badge.filled) { background: #42aeb3; color: #fff; box-shadow: 0 3px 0 #237d84; }
+.range-picks button:has(.no-miss-badge.filled):has(.speed-badge.filled) .status-marks i { border-color: #fff; }
+.status-legend { font-size: 0; }
+.status-legend::before { content: '★ まちがえなし　⚡ はやくできた'; color: #8ca0a1; font-size: 10px; }
+.status-legend::after { content: '\A 2つ そろうと いろが つくよ'; white-space: pre; color: #8ca0a1; font-size: 10px; }
 .earned-stars .badge-slot { position: relative; justify-content:space-between; min-height: 92px; padding: 9px 12px; border: 2px dashed #cbd8d4; background: #f7faf8; color: #cbd8d4; box-shadow: inset 0 -5px 0 #e4ece8; }
 .earned-stars .badge-slot i { display:grid; place-items:center; width:42px; height:42px; margin:auto; border-radius:50%; background:#e6eeea; color:#c1d0ca; font-style:normal; }
 .earned-stars .badge-slot.earned { border-style: solid; border-color:#f0c356; background:#fff4d7; color:#e7ae27; box-shadow: inset 0 -5px 0 #ffe7aa; }
@@ -22,6 +26,7 @@
   .status-marks { gap: 2px; }
   .status-marks i { width: 12px; height: 12px; font-size: 8px; }
   .range-picks .status-marks i { width: 10px; height: 10px; font-size: 6px; }
+  .status-legend::before, .status-legend::after { font-size: 9px; }
   .earned-stars .badge-slot { min-height: 78px; padding: 7px 8px; }
   .earned-stars .badge-slot i { width:34px; height:34px; }
   .home-art { min-height: 80px; max-height: 80px; }
