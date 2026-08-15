@@ -87,7 +87,8 @@ export function stageStatus(progress: Progress, choice: Choice) {
 
 function StatusMarks({ status, showEmpty = false }: { status: ReturnType<typeof stageStatus>; showEmpty?: boolean }) {
   if (!showEmpty && !status.completed && !status.noMiss && !status.speed) return null
-  return <span className="status-marks">{status.completed ? '○' : ''}{status.noMiss ? '★' : showEmpty ? '☆' : ''}{status.speed ? '⚡' : ''}{status.bestTime !== undefined && <small>{status.bestTime.toFixed(1)}びょう</small>}</span>
+  const badges = [{ mark: '○', earned: status.completed, label: 'クリア', kind: 'clear-badge' }, { mark: '★', earned: status.noMiss, label: 'まちがえなし', kind: 'no-miss-badge' }, { mark: '⚡', earned: status.speed, label: 'はやくできた', kind: 'speed-badge' }]
+  return <span className="status-marks" aria-label={badges.filter(badge => badge.earned).map(badge => badge.label).join('　') || 'まだ バッジがない'}>{badges.map(badge => <i className={badge.earned ? `filled ${badge.kind}` : ''} key={badge.mark} aria-hidden="true">{badge.earned ? badge.mark : ''}</i>)}{status.bestTime !== undefined && <small>{status.bestTime.toFixed(1)}びょう</small>}</span>
 }
 
 function Result({ choice, result, onRetry, onSelect, onRecord }: { choice: Choice; result: GameResult; onRetry: () => void; onSelect: () => void; onRecord: () => void }) {
