@@ -2,13 +2,46 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { allKana, groupNames, kanaGroups, pairKana, pairs, shuffle, type Kana } from './data'
 import { clearProgress, loadProgress, saveProgress, type Progress } from './storage'
 
-type View = 'home' | 'select' | 'game' | 'result' | 'book' | 'record'
+type View = 'home' | 'select' | 'game' | 'result' | 'book' | 'record' | 'medals'
 type Level = 1 | 2 | 3
 type Mode = 'practice' | 'challenge'
 export type Choice = { level: Level; set: string; random: boolean; mode: Mode }
 type GameResult = { misses: number; seconds: number }
+type MedalId = 'level1-no-miss' | 'level1-speed' | 'level2-no-miss' | 'level2-speed' | 'normal-no-miss' | 'normal-90' | 'normal-75' | 'random-no-miss' | 'random-90' | 'random-75'
+type Medal = { id: MedalId; level: Level; title: string; subtitle: string; icon: string; how: string }
 const id = (c: Choice) => `${c.level}-${c.set}-${c.random ? 'random' : 'normal'}`
 const hasAllStageBadges = (progress: Progress, key: string) => ['no-miss', 'speed'].every(badge => progress.stars[key]?.includes(badge))
+
+export const medalDefinitions: Medal[] = [
+  { id: 'level1-no-miss', level: 1, title: 'かんぺき', subtitle: 'レベル1', icon: '★', how: 'レベル1を ぜんぶ まちがえずに クリアしよう。' },
+  { id: 'level1-speed', level: 1, title: 'はやさ', subtitle: 'レベル1', icon: '⚡', how: 'レベル1の はやさ バッジを ぜんぶ ゲットしよう。' },
+  { id: 'level2-no-miss', level: 2, title: 'かんぺき', subtitle: 'レベル2', icon: '★', how: 'レベル2を ぜんぶ まちがえずに クリアしよう。' },
+  { id: 'level2-speed', level: 2, title: 'はやさ', subtitle: 'レベル2', icon: '⚡', how: 'レベル2の はやさ バッジを ぜんぶ ゲットしよう。' },
+  { id: 'normal-no-miss', level: 3, title: 'じゅんばん', subtitle: 'まちがえなし', icon: '★', how: 'レベル3の じゅんばんを まちがえずに クリアしよう。' },
+  { id: 'normal-90', level: 3, title: 'じゅんばん', subtitle: '90びょう いない', icon: '⚡', how: 'レベル3の じゅんばんを まちがえずに 90びょう いないで クリアしよう。' },
+  { id: 'normal-75', level: 3, title: 'じゅんばん', subtitle: '75びょう いない', icon: '✦', how: 'レベル3の じゅんばんを まちがえずに 75びょう いないで クリアしよう。' },
+  { id: 'random-no-miss', level: 3, title: 'ランダム', subtitle: 'まちがえなし', icon: '★', how: 'レベル3の ランダムを まちがえずに クリアしよう。' },
+  { id: 'random-90', level: 3, title: 'ランダム', subtitle: '90びょう いない', icon: '⚡', how: 'レベル3の ランダムを まちがえずに 90びょう いないで クリアしよう。' },
+  { id: 'random-75', level: 3, title: 'ランダム', subtitle: '75びょう いない', icon: '✦', how: 'レベル3の ランダムを まちがえずに 75びょう いないで クリアしよう。' },
+]
+
+const hasBadge = (progress: Progress, key: string, badge: string) => progress.stars[key]?.includes(badge) ?? false
+const cleanWithin = (progress: Progress, key: string, seconds: number) => hasBadge(progress, key, 'no-miss') && (progress.bestTimes[key] ?? Infinity) <= seconds
+
+export function medalsFor(progress: Progress): MedalId[] {
+  const earned: MedalId[] = []
+  if (groupNames.every(group => hasBadge(progress, `1-${group}-normal`, 'no-miss'))) earned.push('level1-no-miss')
+  if (groupNames.every(group => hasBadge(progress, `1-${group}-normal`, 'speed'))) earned.push('level1-speed')
+  if (pairs.every(pair => hasBadge(progress, `2-${pair}-normal`, 'no-miss'))) earned.push('level2-no-miss')
+  if (pairs.every(pair => hasBadge(progress, `2-${pair}-normal`, 'speed'))) earned.push('level2-speed')
+  if (hasBadge(progress, '3-all-normal', 'no-miss')) earned.push('normal-no-miss')
+  if (cleanWithin(progress, '3-all-normal', 90)) earned.push('normal-90')
+  if (cleanWithin(progress, '3-all-normal', 75)) earned.push('normal-75')
+  if (hasBadge(progress, '3-all-random', 'no-miss')) earned.push('random-no-miss')
+  if (cleanWithin(progress, '3-all-random', 90)) earned.push('random-90')
+  if (cleanWithin(progress, '3-all-random', 75)) earned.push('random-75')
+  return earned
+}
 
 export function currentLevelFor(progress: Progress): Level {
   const level2Open = groupNames.every(g => hasAllStageBadges(progress, `1-${g}-normal`))
@@ -21,6 +54,7 @@ export function App() {
   const [progress, setProgress] = useState<Progress>(() => loadProgress())
   const [choice, setChoice] = useState<Choice | null>(null)
   const [lastResult, setLastResult] = useState<GameResult | null>(null)
+  const [newMedals, setNewMedals] = useState<MedalId[]>([])
   useEffect(() => saveProgress(progress), [progress])
   const level2Open = groupNames.every(g => hasAllStageBadges(progress, `1-${g}-normal`))
   const level3Open = pairs.every(p => hasAllStageBadges(progress, `2-${p}-normal`))
@@ -29,20 +63,22 @@ export function App() {
   const select = (level: Level, set: string, random = false, mode: Mode = 'challenge') => { setChoice({ level, set, random, mode }); setView('game') }
   const nav = (next: View) => setView(next)
 
-  if (view === 'game' && choice) return <Game choice={choice} back={() => nav('select')} finish={(result) => { setProgress(p => finish(p, choice, result)); setLastResult(result); nav('result') }} />
+  if (view === 'game' && choice) return <Game choice={choice} back={() => nav('select')} finish={(result) => { const next = finish(progress, choice, result); const before = medalsFor(progress); setNewMedals(medalsFor(next).filter(medal => !before.includes(medal))); setProgress(next); setLastResult(result); nav('result') }} />
   return <main className="app-shell">
     <header className="topbar"><button className="brand" onClick={() => nav('home')} aria-label="ほーむへ"><span className="brand-mark">★</span><span className="brand-name">ローマじマスター</span></button><nav><button className={view === 'book' ? 'nav-link active' : 'nav-link'} onClick={() => nav('book')}>いちらん</button><button className={view === 'record' ? 'nav-link active' : 'nav-link'} onClick={() => nav('record')}>きろく</button></nav></header>
-    {view === 'home' && <Home progress={progress} currentLevel={currentLevel} onPlay={() => nav('select')} onRecord={() => nav('record')} />}
+    {view === 'home' && <Home progress={progress} currentLevel={currentLevel} onPlay={() => nav('select')} onRecord={() => nav('record')} onMedals={() => nav('medals')} />}
     {view === 'select' && <Select progress={progress} initialLevel={currentLevel} level2Open={level2Open} level3Open={level3Open} randomOpen={randomOpen} onBack={() => nav('home')} onSelect={select} />}
-    {view === 'result' && choice && lastResult && <Result choice={choice} result={lastResult} onRetry={() => nav('game')} onSelect={() => nav('select')} onRecord={() => nav('record')} />}
+    {view === 'result' && choice && lastResult && <Result choice={choice} result={lastResult} newMedals={newMedals} onCloseMedals={() => setNewMedals([])} onViewMedals={() => { setNewMedals([]); nav('medals') }} onRetry={() => { setNewMedals([]); nav('game') }} onSelect={() => { setNewMedals([]); nav('select') }} onRecord={() => { setNewMedals([]); nav('record') }} />}
     {view === 'book' && <Book onBack={() => nav('home')} />}
     {view === 'record' && <Record progress={progress} onBack={() => nav('home')} reset={() => { if (confirm('きろくを ぜんぶ けしますか？')) { clearProgress(); setProgress(loadProgress()) } }} />}
+    {view === 'medals' && <Medals progress={progress} onBack={() => nav('home')} />}
   </main>
 }
 
-function Home({ progress, currentLevel, onPlay, onRecord }: { progress: Progress; currentLevel: Level; onPlay: () => void; onRecord: () => void }) {
+function Home({ progress, currentLevel, onPlay, onRecord, onMedals }: { progress: Progress; currentLevel: Level; onPlay: () => void; onRecord: () => void; onMedals: () => void }) {
   const badges = progressBadges(progress)
-  return <section className="home-page"><div className="home-copy"><h1>ローマじを<br /><span>おぼえよう！</span></h1><p className="lead">ひらがなを みて、ローマじを えらぼう。</p><button className="primary-button primary-action" onClick={onPlay}>あそぶ <span>→</span></button><button className="home-record" onClick={onRecord}><span className="home-record-title">いまの レベル</span><span className="home-record-stats"><strong>レベル{currentLevel}</strong><b>★ {badges.noMiss}</b><b>⚡ {badges.speed}</b></span><span className="home-record-help">くわしく みる →</span></button></div><div className="home-art romaji-lesson-art" aria-hidden="true"><div className="lesson-title">ひらがな　→　ローマじ</div><div className="lesson-card"><b>あ</b><span>→</span><strong>a</strong></div><div className="lesson-card"><b>し</b><span>→</span><strong>si</strong></div><div className="lesson-card"><b>つ</b><span>→</span><strong>tu</strong></div></div></section>
+  const medalCount = medalsFor(progress).length
+  return <section className="home-page"><div className="home-copy"><h1>ローマじを<br /><span>おぼえよう！</span></h1><p className="lead">ひらがなを みて、ローマじを えらぼう。</p><button className="primary-button primary-action" onClick={onPlay}>あそぶ <span>→</span></button><div className="home-status"><button className="home-record" onClick={onRecord}><span className="home-record-title">いまの レベル</span><span className="home-record-stats"><strong>レベル{currentLevel}</strong><b>★ {badges.noMiss}</b><b>⚡ {badges.speed}</b></span><span className="home-record-help">きろくを みる →</span></button><button className="home-medal" onClick={onMedals}><span>メダル</span><strong>{medalCount} / 10</strong><small>みる →</small></button></div></div><div className="home-art romaji-lesson-art" aria-hidden="true"><div className="lesson-title">ひらがな　→　ローマじ</div><div className="lesson-card"><b>あ</b><span>→</span><strong>a</strong></div><div className="lesson-card"><b>し</b><span>→</span><strong>si</strong></div><div className="lesson-card"><b>つ</b><span>→</span><strong>tu</strong></div></div></section>
 }
 
 function Select({ progress, initialLevel, level2Open, level3Open, randomOpen, onBack, onSelect }: { progress: Progress; initialLevel: Level; level2Open: boolean; level3Open: boolean; randomOpen: boolean; onBack: () => void; onSelect: (level: Level, set: string, random?: boolean, mode?: Mode) => void }) {
@@ -99,11 +135,24 @@ function StatusMarks({ status, showEmpty = false }: { status: ReturnType<typeof 
   return <span className={status.completed ? 'status-marks completed' : 'status-marks'} aria-label={badges.filter(badge => badge.earned).map(badge => badge.label).join('　') || 'まだ バッジがない'}>{badges.map(badge => <i className={badge.earned ? `filled ${badge.kind}` : ''} key={badge.mark} aria-hidden="true">{badge.earned ? badge.mark : ''}</i>)}{status.bestTime !== undefined && <small>{status.bestTime.toFixed(1)}びょう</small>}</span>
 }
 
-function Result({ choice, result, onRetry, onSelect, onRecord }: { choice: Choice; result: GameResult; onRetry: () => void; onSelect: () => void; onRecord: () => void }) {
+function Result({ choice, result, newMedals, onCloseMedals, onViewMedals, onRetry, onSelect, onRecord }: { choice: Choice; result: GameResult; newMedals: MedalId[]; onCloseMedals: () => void; onViewMedals: () => void; onRetry: () => void; onSelect: () => void; onRecord: () => void }) {
   const stars = resultStars(choice, result)
   const clean = stars.includes('no-miss')
   const quick = stars.includes('speed')
-  return <section className="result-page"><div className="result-card"><p className="eyebrow">よく できました！</p><div className="result-mark" aria-hidden="true">{choice.mode === 'practice' ? '☺' : clean ? '★' : '○'}</div><h2>{questionCount(choice)}もん できたよ！</h2>{choice.mode === 'practice' ? <p className="result-copy">れんしゅうを おわったよ。<br />つぎは ほんばんにも ちょうせんしてみよう！</p> : <><p className="result-copy">{clean ? 'まちがえずに できたね！' : 'さいごまで がんばったね！'}</p><p className="earned-label">こんかいの バッジ</p><div className="earned-stars"><span className={`badge-slot ${clean ? 'earned' : ''}`}><i aria-hidden="true">{clean ? '★' : ''}</i><small>まちがえ なし</small></span>{choice.level < 3 && <span className={`badge-slot ${quick ? 'earned' : ''}`}><i aria-hidden="true">{quick ? '⚡' : ''}</i><small>はやく できた</small></span>}</div><p className="result-note">{choice.level === 3 ? `こんかいは ${result.seconds.toFixed(1)} びょう だったよ` : '⚡は 1もじ 2びょうより はやいと もらえるよ'}</p></>}<div className="result-actions">{choice.mode === 'practice' ? <button className="primary-button primary-action" onClick={onSelect}>ほんばんを えらぶ</button> : <div className="result-primary-actions"><button className="retry-button" onClick={onRetry}>もう いちど</button><button className="next-button primary-action" onClick={onSelect}>ほかの もんだいを えらぶ →</button></div>}<button className="result-record" onClick={onRecord}>きろくを みる →</button></div></div></section>
+  return <section className="result-page"><div className="result-card"><p className="eyebrow">よく できました！</p><div className="result-mark" aria-hidden="true">{choice.mode === 'practice' ? '☺' : clean ? '★' : '○'}</div><h2>{questionCount(choice)}もん できたよ！</h2>{choice.mode === 'practice' ? <p className="result-copy">れんしゅうを おわったよ。<br />つぎは ほんばんにも ちょうせんしてみよう！</p> : <><p className="result-copy">{clean ? 'まちがえずに できたね！' : 'さいごまで がんばったね！'}</p><p className="earned-label">こんかいの バッジ</p><div className="earned-stars"><span className={`badge-slot ${clean ? 'earned' : ''}`}><i aria-hidden="true">{clean ? '★' : ''}</i><small>まちがえ なし</small></span>{choice.level < 3 && <span className={`badge-slot ${quick ? 'earned' : ''}`}><i aria-hidden="true">{quick ? '⚡' : ''}</i><small>はやく できた</small></span>}</div><p className="result-note">{choice.level === 3 ? `こんかいは ${result.seconds.toFixed(1)} びょう だったよ` : '⚡は 1もじ 2びょうより はやいと もらえるよ'}</p></>}<div className="result-actions">{choice.mode === 'practice' ? <button className="primary-button primary-action" onClick={onSelect}>ほんばんを えらぶ</button> : <div className="result-primary-actions"><button className="retry-button" onClick={onRetry}>もう いちど</button><button className="next-button primary-action" onClick={onSelect}>ほかの もんだいを えらぶ →</button></div>}<button className="result-record" onClick={onRecord}>きろくを みる →</button></div></div>{newMedals.length > 0 && <MedalPopup medals={newMedals} onClose={onCloseMedals} onView={onViewMedals} />}</section>
+}
+
+function MedalPopup({ medals, onClose, onView, detail }: { medals: MedalId[]; onClose: () => void; onView?: () => void; detail?: boolean }) {
+  const items = medalDefinitions.filter(medal => medals.includes(medal.id))
+  return <div className="medal-overlay" role="dialog" aria-modal="true" aria-label={detail ? 'メダルの せつめい' : 'メダルを ゲット'}><div className="medal-popup"><p className="eyebrow">{detail ? 'メダルの せつめい' : 'メダル ゲット！'}</p><div className="medal-popup-list">{items.map(medal => <div className="medal-popup-item" key={medal.id}><i aria-hidden="true">{medal.icon}</i><span><b>{medal.title}</b><small>{detail ? medal.how : medal.subtitle}</small></span></div>)}</div><div className="medal-popup-actions">{onView && <button className="text-button" onClick={onView}>メダルを みる</button>}<button className="primary-button" onClick={onClose}>{detail ? 'もどる' : 'いいね！'}</button></div></div></div>
+}
+
+function Medals({ progress, onBack }: { progress: Progress; onBack: () => void }) {
+  const [level, setLevel] = useState<Level>(1)
+  const [detail, setDetail] = useState<MedalId | null>(null)
+  const earned = medalsFor(progress)
+  const items = medalDefinitions.filter(medal => medal.level === level)
+  return <section className="content-page medals-page"><button className="back-button" onClick={onBack}>← もどる</button><div className="page-heading medal-heading"><h2>メダル</h2><p>{earned.length} / 10　ゲット</p></div><div className="record-level-tabs medal-tabs" aria-label="レベルを えらぶ">{([1, 2, 3] as Level[]).map(value => <button className={level === value ? 'selected' : ''} onClick={() => setLevel(value)} key={value}>レベル{value}</button>)}</div><p className="medal-help">メダルを おすと ゲットの しかたが みられるよ。</p><div className={`medal-grid medal-level-${level}`}>{items.map(medal => { const isEarned = earned.includes(medal.id); return <button key={medal.id} className={`medal-card ${isEarned ? 'earned' : ''}`} onClick={() => setDetail(medal.id)}><i aria-hidden="true">{isEarned ? medal.icon : ''}</i><span>{medal.title}</span><small>{medal.subtitle}</small></button> })}</div>{detail && <MedalPopup medals={[detail]} detail onClose={() => setDetail(null)} />}</section>
 }
 
 function Book({ onBack }: { onBack: () => void }) { return <section className="content-page"><button className="back-button" onClick={onBack}>← もどる</button><div className="page-heading"><p className="eyebrow">いつでも かくにん</p><h2>いちらん</h2><p>もじと ローマじを みくらべてみよう。</p></div><div className="kana-chart">{groupNames.map(g => <div className="kana-column" key={g}><span className="column-label">{g}ぎょう</span>{kanaGroups[g].map(x => <button key={x.kana} aria-label={`${x.kana} は ${x.roma}`}><b>{x.kana}</b><span>{x.roma}</span></button>)}</div>)}</div></section> }
