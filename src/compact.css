@@ -187,3 +187,37 @@
   .medal-popup-item { padding: 7px 8px; }
   .medal-popup-item i { width: 34px; height: 34px; font-size: 19px; }
 }
+
+/* きろくと メダルの台は、どのレベルでも正方形でそろえる。 */
+.record-stage-grid { flex: 0 0 auto; align-content: start; }
+.record-level-1, .record-level-2, .record-level-3 { grid-template-rows: none; }
+.record-stage { aspect-ratio: 1; width: 100%; border-radius: 18px; }
+.record-stage strong { display: grid; min-height: 20px; place-items: center; }
+.record-stage .status-marks { min-height: 22px; }
+.record-level-3 .record-stage { max-width: 170px; justify-self: center; width: 100%; }
+
+.medal-grid { --medal-size: min(150px, 37vw, calc((100dvh - 245px) / 3)); flex: 0 0 auto; grid-template-columns: repeat(2, var(--medal-size)); grid-template-rows: none; justify-content: center; }
+.medal-level-3 { grid-template-rows: repeat(3, var(--medal-size)); }
+.medal-card { width: var(--medal-size); aspect-ratio: 1; border-radius: 20px; }
+
+@media (max-width: 720px) {
+  .record-stage { border-radius: 13px; }
+  .record-stage strong { min-height: 14px; }
+  .record-stage .status-marks { min-height: 14px; }
+  .record-level-3 .record-stage { max-width: 142px; }
+  .medal-grid { --medal-size: min(37vw, calc((100dvh - 286px) / 3)); }
+  .medal-card { border-radius: 15px; }
+}
+
+/* メダルは、レベルを切りかえず 10こを一画面で見渡せるようにする。 */
+.medal-grid { --medal-size: min(122px, calc((100dvh - 252px) / 4), calc((100% - 20px) / 3)); grid-template-columns: repeat(3, var(--medal-size)); grid-template-rows: repeat(4, var(--medal-size)); gap: 10px; }
+.medal-level-3 { grid-template-rows: repeat(4, var(--medal-size)); }
+.medal-card { width: 100%; }
+.medal-card:nth-child(10) { grid-column: 2; }
+
+@media (max-width: 720px) {
+  .medal-grid { --medal-size: min(calc((100dvh - 260px) / 4), calc((100% - 12px) / 3)); gap: 6px; }
+  .medal-card i { width: 28px; height: 28px; font-size: 16px; }
+  .medal-card span { font-size: 11px; }
+  .medal-card small { font-size: 8px; }
+}
