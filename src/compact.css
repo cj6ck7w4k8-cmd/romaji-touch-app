@@ -110,3 +110,9 @@
   .primary-action { outline-width: 2px; outline-offset: 2px; }
   .result-primary-actions .retry-button { padding: 13px 6px; font-size: 13px; }
 }
+
+/* 回答中の選択肢は、直前に押した場所へ色が残らないようにする。 */
+.answer:not(.right):not(.wrong):hover {
+  transform: none;
+  background: #f3f8f5;
+}
