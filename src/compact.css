@@ -122,3 +122,68 @@
   transform: none;
   background: #f3f8f5;
 }
+
+/* きろくと メダルは、ほーむで ならべて みつけやすくする。 */
+.home-status { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, .72fr); gap: 10px; margin-top: 18px; }
+.home-status .home-record { min-width: 0; margin: 0; }
+.home-medal { display: flex; min-width: 0; flex-direction: column; align-items: center; justify-content: center; gap: 2px; border: 1px solid #f0d58b; border-radius: 18px; background: #fff8df; color: #9c731e; box-shadow: 0 4px 0 #f0ddaa; font-weight: 900; }
+.home-medal span { font-size: 11px; }
+.home-medal strong { color: #df9a22; font-size: 23px; line-height: 1.05; }
+.home-medal small { color: #a78b56; font-size: 9px; }
+.home-medal:hover { transform: translateY(-2px); }
+
+/* メダルは、うめこみ式の台座で そろいぐあいを ひとめで みせる。 */
+.medals-page { display: flex; min-height: calc(100dvh - 86px); max-height: calc(100dvh - 86px); flex-direction: column; padding: 12px 0 16px; }
+.medal-heading { margin: 2px 0 8px; }
+.medal-heading h2 { margin-bottom: 1px; }
+.medal-heading p { margin: 0; font-size: 13px; }
+.medal-tabs { flex: 0 0 auto; }
+.medal-help { margin: 7px 0 9px; color: #81958f; font-size: 11px; font-weight: 800; text-align: center; }
+.medal-grid { display: grid; flex: 1 1 auto; min-height: 0; gap: 10px; max-width: 480px; width: 100%; margin: 0 auto; }
+.medal-level-1, .medal-level-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: minmax(0, 1fr); }
+.medal-level-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: repeat(3, minmax(0, 1fr)); }
+.medal-card { display: flex; min-height: 0; flex-direction: column; align-items: center; justify-content: center; gap: 3px; border: 2px solid #d5ddda; border-radius: 18px; background: #eff2f0; color: #89958f; box-shadow: inset 0 -4px 0 #dde3e0; font-weight: 900; }
+.medal-card i { display: grid; place-items: center; width: 43px; height: 43px; border: 2px solid #c6ceca; border-radius: 50%; background: #e0e5e2; color: transparent; font-size: 25px; font-style: normal; line-height: 1; }
+.medal-card span { font-size: 14px; }
+.medal-card small { font-size: 10px; }
+.medal-card.earned { border-color: #ec9166; background: #fff0e7; color: #a94f34; box-shadow: inset 0 -4px 0 #ffd0bd; }
+.medal-card.earned i { border-color: #e97e52; background: #f28d5b; color: #fff; box-shadow: 0 3px 0 #d86239; }
+.medal-card.earned:nth-child(3n) i { background: #eea44f; border-color: #dc8b31; box-shadow: 0 3px 0 #c76b1e; }
+.medal-card.earned:nth-child(3n + 2) i { background: #e97966; border-color: #d45b46; box-shadow: 0 3px 0 #bf4937; }
+.medal-card:active { transform: translateY(2px); box-shadow: inset 0 -2px 0 #dde3e0; }
+.medal-card.earned:active { box-shadow: inset 0 -2px 0 #ffd0bd; }
+
+.medal-overlay { position: fixed; z-index: 20; inset: 0; display: grid; place-items: center; padding: 18px; background: rgba(32, 56, 57, .34); }
+.medal-popup { width: min(100%, 390px); padding: 22px 20px 18px; border: 2px solid #f0c35e; border-radius: 25px; background: #fffdf8; box-shadow: 0 10px 0 rgba(81, 59, 30, .17); text-align: center; }
+.medal-popup .eyebrow { margin-bottom: 13px; color: #dc704d; }
+.medal-popup-list { display: grid; gap: 8px; }
+.medal-popup-item { display: flex; align-items: center; gap: 11px; padding: 8px 10px; border-radius: 15px; background: #fff0e7; text-align: left; }
+.medal-popup-item i { display: grid; place-items: center; width: 39px; height: 39px; flex: 0 0 auto; border-radius: 50%; background: #f28d5b; color: #fff; box-shadow: 0 3px 0 #d86239; font-size: 22px; font-style: normal; }
+.medal-popup-item span { display: flex; min-width: 0; flex-direction: column; gap: 1px; color: #a94f34; }
+.medal-popup-item b { font-size: 14px; }
+.medal-popup-item small { color: #806c62; font-size: 10px; line-height: 1.35; }
+.medal-popup-actions { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 15px; }
+.medal-popup-actions .text-button { margin: 0; padding: 9px 4px; font-size: 12px; }
+.medal-popup-actions .primary-button { padding:11px 17px; border-radius: 15px; font-size: 14px; }
+
+@media (max-width: 720px) {
+  .home-status { gap: 7px; margin-top: 12px; }
+  .home-medal { border-radius: 14px; box-shadow: 0 3px 0 #f0ddaa; }
+  .home-medal strong { font-size: 18px; }
+  .medals-page { min-height: calc(100dvh - 72px); max-height: calc(100dvh - 72px); padding: 8px 0 10px; }
+  .medal-heading { margin: 0 0 4px; }
+  .medal-heading h2 { font-size: 27px; }
+  .medal-heading p { font-size: 11px; }
+  .medal-tabs { margin-bottom: 0; }
+  .medal-tabs button { min-height: 33px; }
+  .medal-help { margin: 5px 0 7px; font-size: 9px; }
+  .medal-grid { gap: 6px; }
+  .medal-card { border-radius: 13px; box-shadow: inset 0 -3px 0 #dde3e0; }
+  .medal-card.earned { box-shadow: inset 0 -3px 0 #ffd0bd; }
+  .medal-card i { width: 31px; height: 31px; font-size: 18px; }
+  .medal-card span { font-size: 12px; }
+  .medal-card small { font-size: 9px; }
+  .medal-popup { padding: 18px 15px 14px; }
+  .medal-popup-item { padding: 7px 8px; }
+  .medal-popup-item i { width: 34px; height: 34px; font-size: 19px; }
+}
