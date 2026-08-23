@@ -91,3 +91,22 @@
   .home-page { min-height: calc(175.439dvh - 88px); max-height: calc(175.439dvh - 88px); }
   .home-art { display: none; }
 }
+
+/* いま進む操作と、補助の操作を見分けやすくする。 */
+.nav-link { border: 1px solid #dce9e5; background: #f6faf8; box-shadow: 0 2px 0 #e5efeb; }
+.nav-link:hover, .nav-link.active { border-color: #b7ddd8; }
+.brand-name { white-space: nowrap; font-size: 18px; font-weight: 900; letter-spacing: -.04em; }
+.back-button, .result-record { padding: 7px 11px; border: 1px solid #dce9e5; border-radius: 12px; background: #f6faf8; box-shadow: 0 2px 0 #e5efeb; }
+.primary-action { position: relative; outline: 3px solid #ffcf58; outline-offset: 3px; }
+.primary-action:focus-visible, .nav-link:focus-visible, .back-button:focus-visible, .result-record:focus-visible { outline: 3px solid #218a98; outline-offset: 3px; }
+.result-primary-actions .next-button { background: #218a98; color: #fff; box-shadow: 0 6px 0 #146b77; }
+.result-primary-actions .retry-button { flex: 1; margin: 0; padding: 15px 10px; border: 2px solid #cfded9; border-radius: 18px; background: #f7faf8; color: #667f7a; box-shadow: 0 4px 0 #dde9e4; font-size: 16px; font-weight: 900; }
+.result-primary-actions .next-button:hover, .result-primary-actions .retry-button:hover { transform: translateY(-2px); }
+@media (max-width: 720px) {
+  .nav-link { padding: 8px; font-size: 11px; white-space: nowrap; }
+  .brand { gap: 7px; }
+  .brand-name { font-size: 14px; }
+  .back-button, .result-record { padding: 5px 8px; font-size: 12px; }
+  .primary-action { outline-width: 2px; outline-offset: 2px; }
+  .result-primary-actions .retry-button { padding: 13px 6px; font-size: 13px; }
+}
