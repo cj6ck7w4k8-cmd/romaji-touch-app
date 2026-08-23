@@ -12,8 +12,13 @@
 .range-picks .status-marks i { width: 11px; height: 11px; font-size: 7px; }
 .range-picks button:has(.no-miss-badge.filled):has(.speed-badge.filled) { background: #f28d5b; color: #fff; box-shadow: 0 3px 0 #c96036; }
 .range-picks button:has(.no-miss-badge.filled):has(.speed-badge.filled) .status-marks i { border-color: #fff; }
+.level-three-picks button:has(.status-marks.completed) { background: #f28d5b; color: #fff; box-shadow: 0 3px 0 #c96036; }
+.level-three-picks button:has(.status-marks.completed) .status-marks i { border-color: #fff; }
+.level-three-picks button:has(.status-marks.completed) .status-marks small { color: #fff; }
+.level-three-picks .status-marks i:nth-child(2), .record-level-3 .status-marks i:nth-child(2) { display: none; }
 .status-legend { font-size: 0; }
 .status-legend::before { content: '★ まちがえなし　⚡ はやくできた'; color: #8ca0a1; font-size: 10px; }
+.choice-box:has(.level-three-picks) .status-legend::before { content: '★ まちがえなし'; }
 .status-legend::after { content: none; }
 .choice-status { display: none; }
 .romaji-lesson-art { display: grid; grid-template-columns: repeat(3, 1fr); align-content: center; gap: 14px; min-height: 300px; max-height: 300px; padding: 36px 24px 26px; background: #dff3ee; border-radius: 34px; }
