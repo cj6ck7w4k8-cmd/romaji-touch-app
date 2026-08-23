@@ -12,6 +12,7 @@
 .range-picks .status-marks i { width: 11px; height: 11px; font-size: 7px; }
 .range-picks button:has(.no-miss-badge.filled):has(.speed-badge.filled) { background: #f28d5b; color: #fff; box-shadow: 0 3px 0 #c96036; }
 .range-picks button:has(.no-miss-badge.filled):has(.speed-badge.filled) .status-marks i { border-color: #fff; }
+.range-picks button.selected { outline: 3px solid #ffcf58; outline-offset: 2px; }
 .level-three-picks button:has(.status-marks.completed) { background: #f28d5b; color: #fff; box-shadow: 0 3px 0 #c96036; }
 .level-three-picks button:has(.status-marks.completed) .status-marks i { border-color: #fff; }
 .level-three-picks button:has(.status-marks.completed) .status-marks small { color: #fff; }
