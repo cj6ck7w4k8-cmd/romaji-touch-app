@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { allKana, kanaGroups, pairKana, shuffle } from './data'
-import { finish, progressBadges, questionCount, resultStars, stageStatus } from './App'
+import { allKana, groupNames, kanaGroups, pairKana, pairs, shuffle } from './data'
+import { currentLevelFor, finish, medalsFor, progressBadges, questionCount, resultStars, stageStatus } from './App'
 import { emptyProgress } from './storage'
 
 describe('もんだいでーた', () => {
@@ -57,5 +57,32 @@ describe('きろく', () => {
     const progress = finish(emptyProgress(), choice, {misses:0,seconds:8})
     expect(stageStatus(progress, choice)).toEqual({completed:true, noMiss:true, speed:true, bestTime:undefined})
     expect(stageStatus(progress, {...choice, set:'か'})).toEqual({completed:false, noMiss:false, speed:false, bestTime:undefined})
+  })
+  it('いまの れべるを かいほうじょうきょうから きめる', () => {
+    const level2 = { ...emptyProgress(), stars: Object.fromEntries(groupNames.map(group => [`1-${group}-normal`, ['no-miss', 'speed']])) }
+    const level3 = { ...level2, stars: { ...level2.stars, ...Object.fromEntries(pairs.map(pair => [`2-${pair}-normal`, ['no-miss', 'speed']])) } }
+    expect(currentLevelFor(emptyProgress())).toBe(1)
+    expect(currentLevelFor(level2)).toBe(2)
+    expect(currentLevelFor(level3)).toBe(3)
+  })
+  it('れべる1と2の ぜんぶの バッジから メダルを きめる', () => {
+    const progress = {
+      ...emptyProgress(),
+      stars: {
+        ...Object.fromEntries(groupNames.map(group => [`1-${group}-normal`, ['no-miss', 'speed']])),
+        ...Object.fromEntries(pairs.map(pair => [`2-${pair}-normal`, ['no-miss', 'speed']])),
+      },
+    }
+    expect(medalsFor(progress)).toEqual(['level1-no-miss', 'level1-speed', 'level2-no-miss', 'level2-speed'])
+  })
+  it('れべる3の はやさ メダルは まちがえなしが ひつよう', () => {
+    const progress = {
+      ...emptyProgress(),
+      stars: { '3-all-normal': ['no-miss'], '3-all-random': ['no-miss'] },
+      bestTimes: { '3-all-normal': 74.9, '3-all-random': 90 },
+    }
+    expect(medalsFor(progress)).toEqual(['normal-no-miss', 'normal-90', 'normal-75', 'random-no-miss', 'random-90'])
+    const missed = { ...progress, stars: { ...progress.stars, '3-all-random': [] } }
+    expect(medalsFor(missed)).not.toContain('random-90')
   })
 })
