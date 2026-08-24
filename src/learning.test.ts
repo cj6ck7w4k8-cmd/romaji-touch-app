@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { allKana, groupNames, kanaGroups, pairKana, pairs, shuffle } from './data'
-import { currentLevelFor, finish, medalsFor, progressBadges, questionCount, resultStars, stageStatus } from './App'
+import { currentLevelFor, finish, medalsFor, nextStageFor, progressBadges, questionCount, resultStars, stageStatus } from './App'
 import { emptyProgress } from './storage'
 
 describe('もんだいでーた', () => {
@@ -64,6 +64,16 @@ describe('きろく', () => {
     expect(currentLevelFor(emptyProgress())).toBe(1)
     expect(currentLevelFor(level2)).toBe(2)
     expect(currentLevelFor(level3)).toBe(3)
+  })
+  it('ほーむから つぎに とりくむ もんだいを えらぶ', () => {
+    const level1 = { ...emptyProgress(), stars: { '1-あ-normal': ['no-miss', 'speed'] } }
+    const level2 = { ...emptyProgress(), stars: Object.fromEntries(groupNames.map(group => [`1-${group}-normal`, ['no-miss', 'speed']])) }
+    const level3 = { ...level2, stars: { ...level2.stars, ...Object.fromEntries(pairs.map(pair => [`2-${pair}-normal`, ['no-miss', 'speed']])) } }
+    expect(nextStageFor(emptyProgress())).toMatchObject({ level: 1, set: 'あ', random: false, mode: 'challenge' })
+    expect(nextStageFor(level1)).toMatchObject({ level: 1, set: 'か', random: false })
+    expect(nextStageFor(level2)).toMatchObject({ level: 2, set: pairs[0], random: false })
+    expect(nextStageFor(level3)).toMatchObject({ level: 3, set: 'all', random: false })
+    expect(nextStageFor({ ...level3, stars: { ...level3.stars, '3-all-normal': ['no-miss'] } })).toMatchObject({ level: 3, set: 'all', random: true })
   })
   it('れべる1と2の ぜんぶの バッジから メダルを きめる', () => {
     const progress = {
