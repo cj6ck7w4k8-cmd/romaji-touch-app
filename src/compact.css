@@ -362,3 +362,104 @@ button:disabled:focus-visible { outline-color: #9eaea8; }
   .kana-item b { font-size: 18px; }
   .kana-item span { font-size: 10px; }
 }
+
+/* ほーむは、学習の印と最初の一歩を近くにまとめる。 */
+.home-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100dvh - 86px);
+  max-height: calc(100dvh - 86px);
+}
+
+.home-copy {
+  width: min(100%, 620px);
+  padding: 28px 0;
+  text-align: center;
+}
+
+.home-title-line {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+.home-title-line h1 {
+  margin: 0;
+  text-align: left;
+}
+
+.home-logo {
+  display: grid;
+  flex: 0 0 auto;
+  grid-template-columns: auto auto auto;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 12px;
+  border: 2px solid #cae9e1;
+  border-radius: 16px;
+  background: #edf7f3;
+  box-shadow: 0 3px 0 #cfe4de;
+  line-height: 1;
+}
+
+.home-logo b { color: #ef8870; font-size: 32px; }
+.home-logo span { color: #94aaa7; font-size: 15px; font-weight: 900; }
+.home-logo strong { color: #1c7f8e; font-size: 23px; }
+
+.home-copy .lead { margin: 14px 0 22px; }
+
+.home-start {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.home-start .next-stage { margin: 0; }
+.home-start .primary-button { min-width: 260px; }
+
+.home-status {
+  width: min(100%, 460px);
+  margin: 28px auto 0;
+}
+
+.home-record, .home-medal { min-height: 82px; }
+.home-record-title, .home-medal > span { font-size: 13px; }
+.home-record-stats strong, .home-medal strong { font-size: 25px; }
+.home-record-help, .home-medal small { display: none; }
+
+@media (max-width: 720px) {
+  .home-copy { padding: 16px 0 10px; }
+  .home-title-line { justify-content: flex-start; gap: 10px; }
+  .home-title-line h1 { font-size: 34px; }
+  .home-logo { gap: 4px; padding: 8px 9px; border-radius: 13px; }
+  .home-logo b { font-size: 26px; }
+  .home-logo span { font-size: 12px; }
+  .home-logo strong { font-size: 19px; }
+  .home-copy .lead { margin: 12px 0 20px; text-align: left; }
+  .home-start { align-items: stretch; }
+  .home-start .next-stage { align-self: flex-start; }
+  .home-start .primary-button { width: 100%; min-width: 0; }
+  .home-status { width: 100%; margin-top: 18px; }
+  .home-record, .home-medal { min-height: 78px; }
+}
+
+@media (max-height: 520px) and (orientation: landscape) {
+  .home-copy { width: min(100%, 620px); padding: 6px 0; }
+  .home-title-line { gap: 10px; }
+  .home-title-line h1 { font-size: 25px; line-height: 1.02; }
+  .home-logo { gap: 4px; padding: 7px 9px; border-radius: 12px; }
+  .home-logo b { font-size: 24px; }
+  .home-logo span { font-size: 11px; }
+  .home-logo strong { font-size: 18px; }
+  .home-copy .lead { margin: 3px 0 5px; font-size: 11px; }
+  .home-start { gap: 3px; }
+  .home-start .next-stage { padding: 4px 8px; font-size: 10px; }
+  .home-start .primary-button { min-height: 40px; min-width: 220px; padding: 7px 16px; }
+  .home-status { width: min(100%, 420px); margin-top: 7px; }
+  .home-record, .home-medal { min-height: 50px; }
+  .home-record-title, .home-medal > span { font-size: 10px; }
+  .home-record-stats strong, .home-medal strong { font-size: 18px; }
+}
