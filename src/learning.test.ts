@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { allKana, dakutenGroupNames, dakutenGroups, groupNames, kanaGroups, pairKana, pairs, shuffle } from './data'
+import { allKana, dakutenGroupNames, dakutenGroups, groupNames, kanaGroups, pairKana, pairs, shortWords, shuffle, voicedYouonGroupNames, voicedYouonGroups, youonGroupNames, youonGroups } from './data'
 import { currentLevelFor, finish, medalsFor, nextStageFor, progressBadges, questionCount, resultStars, stageStatus } from './App'
 import { emptyProgress } from './storage'
 
@@ -12,6 +12,9 @@ describe('もんだいでーた', () => {
     expect(dakutenGroupNames).toEqual(['が', 'ざ', 'だ', 'ば', 'ぱ'])
     expect(dakutenGroups['ざ'].find(x => x.kana === 'じ')?.roma).toBe('zi')
     expect(dakutenGroups['だ'].find(x => x.kana === 'ぢ')?.roma).toBe('di')
+    expect(youonGroups['しゃ'].find(x => x.kana === 'しょ')?.roma).toBe('syo')
+    expect(voicedYouonGroups['じゃ'].find(x => x.kana === 'じゅ')?.roma).toBe('zyu')
+    expect(shortWords.find(x => x.kana === 'がっき')?.roma).toBe('gakki')
   })
   it('しゃっふるで もとの もじを なくさない', () => {
     expect(shuffle(['a','b','c']).sort()).toEqual(['a','b','c'])
@@ -88,6 +91,37 @@ describe('きろく', () => {
     const level4Open = { ...emptyProgress(), stars: { '3-all-normal': ['no-miss'], '4-が-normal': ['no-miss'] } }
     expect(nextStageFor(level4Open)).toMatchObject({ level: 4, set: 'ざ', random: false })
     expect(dakutenGroupNames.every(group => questionCount({ level: 4, set: group, random: false, mode: 'challenge' }) === 5)).toBe(true)
+  })
+  it('レベル5と6は 3もじずつ、レベル7と8は きめた もんすうをだす', () => {
+    expect(youonGroupNames.every(group => questionCount({ level: 5, set: group, random: false, mode: 'challenge' }) === 3)).toBe(true)
+    expect(voicedYouonGroupNames.every(group => questionCount({ level: 6, set: group, random: false, mode: 'challenge' }) === 3)).toBe(true)
+    expect(questionCount({ level: 7, set: 'all', random: true, mode: 'challenge' })).toBe(30)
+    expect(questionCount({ level: 8, set: 'words', random: true, mode: 'challenge' })).toBe(10)
+  })
+  it('レベル5から8は まちがえなしの バッジだけを きろくする', () => {
+    const choices = [
+      { level: 5 as const, set: 'きゃ', random: false, mode: 'challenge' as const },
+      { level: 6 as const, set: 'ぎゃ', random: false, mode: 'challenge' as const },
+      { level: 7 as const, set: 'all', random: true, mode: 'challenge' as const },
+      { level: 8 as const, set: 'words', random: true, mode: 'challenge' as const },
+    ]
+    choices.forEach(choice => expect(resultStars(choice, { misses: 0, seconds: 1 })).toEqual(['no-miss']))
+  })
+  it('レベル6まで まちがえなしなら レベル7、そのあとレベル8を あんないする', () => {
+    const until6 = {
+      ...emptyProgress(),
+      stars: {
+        '3-all-normal': ['no-miss'],
+        ...Object.fromEntries(dakutenGroupNames.map(group => [`4-${group}-normal`, ['no-miss']])),
+        ...Object.fromEntries(youonGroupNames.map(group => [`5-${group}-normal`, ['no-miss']])),
+        ...Object.fromEntries(voicedYouonGroupNames.map(group => [`6-${group}-normal`, ['no-miss']])),
+      },
+    }
+    expect(currentLevelFor(until6)).toBe(7)
+    expect(nextStageFor(until6)).toMatchObject({ level: 7, set: 'all', random: true })
+    const level8 = { ...until6, stars: { ...until6.stars, '7-all-random': ['no-miss'] } }
+    expect(currentLevelFor(level8)).toBe(8)
+    expect(nextStageFor(level8)).toMatchObject({ level: 8, set: 'words', random: true })
   })
   it('れべる1と2の ぜんぶの バッジから メダルを きめる', () => {
     const progress = {

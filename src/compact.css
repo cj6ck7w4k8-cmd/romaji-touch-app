@@ -252,6 +252,29 @@
 .kana-item b { color: #18324b; font-size: 27px; line-height: 1; }
 .kana-item span { color: #176875; font-size: 14px; font-weight: 900; }
 
+/* レベル5〜8も、これまでの台座と同じ大きさ・色の規則で見せる。 */
+.level-row .level-picks { display: grid; grid-template-columns: repeat(4, minmax(44px, 1fr)); width: min(100%, 240px); }
+.range-picks.level-five-picks { grid-template-columns: repeat(4, minmax(0, 1fr)); max-width: 560px; }
+.record-level-5 { grid-template-columns: repeat(4, 1fr); max-width: 450px; width: 100%; margin: 0 auto; }
+.record-level-6 { grid-template-columns: repeat(4, 1fr); max-width: 450px; width: 100%; margin: 0 auto; }
+.record-level-7, .record-level-8 { grid-template-columns: minmax(160px, 250px); justify-content: center; width: 100%; margin: 0 auto; }
+.record-level-5 .record-stage, .record-level-6 .record-stage { max-width: 100px; justify-self: center; }
+.record-level-7 .record-stage, .record-level-8 .record-stage { max-width: 210px; justify-self: center; }
+.record-level-5 .record-stage:not(.completed), .record-level-6 .record-stage:not(.completed), .record-level-7 .record-stage:not(.completed), .record-level-8 .record-stage:not(.completed) { border-color: #b9c6c0; color: #657772; background: #f1f4f2; }
+.record-level-5 .record-stage:not(.completed) .status-marks i, .record-level-6 .record-stage:not(.completed) .status-marks i, .record-level-7 .record-stage:not(.completed) .status-marks i, .record-level-8 .record-stage:not(.completed) .status-marks i { border-color: #aebdb7; background: #e1e7e4; }
+.word-chart { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.word-chart .kana-item b { font-size: 21px; }
+
+@media (max-width: 720px) {
+  .level-row .level-picks { grid-template-columns: repeat(4, minmax(36px, 1fr)); width: 100%; }
+  .range-picks.level-five-picks { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .record-level-5 .record-stage, .record-level-6 .record-stage { max-width: 68px; }
+  .record-level-7 .record-stage, .record-level-8 .record-stage { max-width: 145px; }
+  .word-chart { grid-template-columns: repeat(3, minmax(0, 1fr)); overflow-y: auto; align-content: start; }
+  .word-chart .kana-item { min-height: 46px; }
+  .word-chart .kana-item b { font-size: 16px; }
+}
+
 /* すべての押せる部品で、キーボードの現在地を見失わない。 */
 button:focus-visible { outline: 3px solid #176875; outline-offset: 3px; }
 button:disabled:focus-visible { outline-color: #9eaea8; }

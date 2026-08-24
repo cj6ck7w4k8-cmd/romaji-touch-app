@@ -24,5 +24,34 @@ const dakutenRaw: Record<string, [string, string][]> = {
 export const dakutenGroups: Record<string, Kana[]> = Object.fromEntries(Object.entries(dakutenRaw).map(([group, items]) => [group, items.map(([kana, roma]) => ({ kana, roma, group }))]))
 export const dakutenGroupNames = Object.keys(dakutenGroups)
 export const allDakuten = Object.values(dakutenGroups).flat()
-export const allAvailableKana = [...allKana, ...allDakuten]
+
+const youonRaw: Record<string, [string, string][]> = {
+  'きゃ': [['きゃ','kya'],['きゅ','kyu'],['きょ','kyo']],
+  'しゃ': [['しゃ','sya'],['しゅ','syu'],['しょ','syo']],
+  'ちゃ': [['ちゃ','tya'],['ちゅ','tyu'],['ちょ','tyo']],
+  'にゃ': [['にゃ','nya'],['にゅ','nyu'],['にょ','nyo']],
+  'ひゃ': [['ひゃ','hya'],['ひゅ','hyu'],['ひょ','hyo']],
+  'みゃ': [['みゃ','mya'],['みゅ','myu'],['みょ','myo']],
+  'りゃ': [['りゃ','rya'],['りゅ','ryu'],['りょ','ryo']],
+}
+export const youonGroups: Record<string, Kana[]> = Object.fromEntries(Object.entries(youonRaw).map(([group, items]) => [group, items.map(([kana, roma]) => ({ kana, roma, group }))]))
+export const youonGroupNames = Object.keys(youonGroups)
+export const allYouon = Object.values(youonGroups).flat()
+
+const voicedYouonRaw: Record<string, [string, string][]> = {
+  'ぎゃ': [['ぎゃ','gya'],['ぎゅ','gyu'],['ぎょ','gyo']],
+  'じゃ': [['じゃ','zya'],['じゅ','zyu'],['じょ','zyo']],
+  'びゃ': [['びゃ','bya'],['びゅ','byu'],['びょ','byo']],
+  'ぴゃ': [['ぴゃ','pya'],['ぴゅ','pyu'],['ぴょ','pyo']],
+}
+export const voicedYouonGroups: Record<string, Kana[]> = Object.fromEntries(Object.entries(voicedYouonRaw).map(([group, items]) => [group, items.map(([kana, roma]) => ({ kana, roma, group }))]))
+export const voicedYouonGroupNames = Object.keys(voicedYouonGroups)
+export const allVoicedYouon = Object.values(voicedYouonGroups).flat()
+export const allAvailableKana = [...allKana, ...allDakuten, ...allYouon, ...allVoicedYouon]
+export const shortWords: Kana[] = [
+  ['あさ','asa'], ['いえ','ie'], ['うみ','umi'], ['かさ','kasa'], ['くつ','kutu'],
+  ['すし','susi'], ['ねこ','neko'], ['ふね','hune'], ['きゃく','kyaku'], ['しゃしん','syasin'],
+  ['がっき','gakki'], ['きって','kitte'], ['きっぷ','kippu'], ['ざっし','zassi'], ['せっけん','sekken'],
+  ['まっすぐ','massugu'], ['ちょっと','tyotto'], ['はっぱ','happa'], ['らっぱ','rappa'], ['にっき','nikki'],
+].map(([kana, roma]) => ({ kana, roma, group: 'ことば' }))
 export const shuffle = <T,>(items: T[]) => [...items].sort(() => Math.random() - 0.5)
