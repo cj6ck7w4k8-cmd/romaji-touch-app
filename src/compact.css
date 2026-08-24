@@ -12,14 +12,12 @@
 .range-picks button:has(.no-miss-badge.filled):has(.speed-badge.filled) { background: #f28d5b; color: #fff; box-shadow: 0 3px 0 #c96036; }
 .range-picks button:has(.no-miss-badge.filled):has(.speed-badge.filled) .status-marks i { border-color: #fff; }
 .range-picks button.selected { outline: 3px solid #ffcf58; outline-offset: 2px; }
-.level-three-picks button:has(.status-marks.completed) { background: #f28d5b; color: #fff; box-shadow: 0 3px 0 #c96036; }
-.level-three-picks button:has(.status-marks.completed) .status-marks i { border-color: #fff; }
+.level-three-picks button:has(.status-marks.completed), .single-badge-level .range-picks button:has(.status-marks.completed):has(.no-miss-badge.filled) { background: #f28d5b; color: #fff; box-shadow: 0 3px 0 #c96036; }
+.level-three-picks button:has(.status-marks.completed) .status-marks i, .single-badge-level .range-picks button:has(.status-marks.completed):has(.no-miss-badge.filled) .status-marks i { border-color: #fff; }
 .level-three-picks button:has(.status-marks.completed) .status-marks small { color: #fff; }
 .level-three-picks .status-marks i:nth-child(2), .record-level-3 .status-marks i:nth-child(2) { display: none; }
-.status-legend { font-size: 0; }
-.status-legend::before { content: '★ まちがえなし　⚡ はやくできた'; color: #8ca0a1; font-size: 10px; }
-.choice-box:has(.level-three-picks) .status-legend::before { content: '★ まちがえなし'; }
-.status-legend::after { content: none; }
+.status-legend { color: #8ca0a1; font-size: 10px; }
+.status-legend::before, .status-legend::after { content: none; }
 .choice-status { display: none; }
 .romaji-lesson-art { display: grid; grid-template-columns: repeat(3, 1fr); align-content: center; gap: 14px; min-height: 300px; max-height: 300px; padding: 36px 24px 26px; background: #dff3ee; border-radius: 34px; }
 .lesson-title { grid-column: 1 / -1; color: #287b88; font-size: 16px; font-weight: 900; text-align: center; }
@@ -32,13 +30,14 @@
 .record-heading { margin: 2px 0 8px; }
 .record-heading h2 { margin-bottom: 2px; }
 .record-heading p { margin: 0; font-size: 12px; }
-.record-level-tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; margin-bottom: 10px; }
+.record-level-tabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 7px; margin-bottom: 10px; }
 .record-level-tabs button { min-height: 38px; border-radius: 13px; background: #edf4f1; color: #6f8783; font-weight: 900; }
 .record-level-tabs button.selected { background: #ffcf58; color: #784f12; box-shadow: 0 3px 0 #e8ad31; }
 .record-stage-grid { display: grid; flex: 1 1 auto; min-height: 0; gap: 8px; }
 .record-level-1 { grid-template-columns: repeat(5, 1fr); grid-template-rows: repeat(2, minmax(0, 1fr)); }
 .record-level-2 { grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, minmax(0, 1fr)); max-width: 460px; width: 100%; margin: 0 auto; }
 .record-level-3 { grid-template-columns: repeat(2, 1fr); grid-template-rows: minmax(0, 1fr); max-width: 460px; width: 100%; margin: 0 auto; }
+.record-level-4 { grid-template-columns: repeat(5, 1fr); max-width: 580px; width: 100%; margin: 0 auto; }
 .record-stage { display: flex; min-height: 0; flex-direction: column; align-items: center; justify-content: center; gap: 6px; border: 2px solid #d6ddda; border-radius: 16px; background: #eff2f0; color: #85918d; box-shadow: inset 0 -4px 0 #dde3e0; }
 .record-stage strong { font-size: 15px; }
 .record-stage .status-marks { gap: 5px; }
@@ -200,11 +199,18 @@
 
 /* きろくと メダルの台は、どのレベルでも正方形でそろえる。 */
 .record-stage-grid { flex: 0 0 auto; align-content: start; }
-.record-level-1, .record-level-2, .record-level-3 { grid-template-rows: none; }
+.record-level-1, .record-level-2, .record-level-3, .record-level-4 { grid-template-rows: none; }
 .record-stage { aspect-ratio: 1; width: 100%; border-radius: 18px; }
 .record-stage strong { display: grid; min-height: 20px; place-items: center; }
 .record-stage .status-marks { min-height: 22px; }
 .record-level-3 .record-stage { max-width: 170px; justify-self: center; width: 100%; }
+.record-level-4 .record-stage { max-width: 108px; justify-self: center; width: 100%; }
+.record-level-4 .record-stage:not(.completed) { border-color: #b9c6c0; color: #657772; background: #f1f4f2; }
+.record-level-4 .record-stage:not(.completed) .status-marks i { border-color: #aebdb7; background: #e1e7e4; }
+
+.book-tabs { display: flex; justify-content: center; gap: 8px; margin: -7px 0 10px; }
+.book-tabs button { min-height: 36px; padding: 7px 14px; border-radius: 13px; background: #edf4f1; color: #6f8783; font-size: 13px; font-weight: 900; }
+.book-tabs button.selected { background: #ffcf58; color: #784f12; box-shadow: 0 3px 0 #e8ad31; }
 
 .medal-grid { --medal-size: min(150px, 37vw, calc((100dvh - 245px) / 3)); flex: 0 0 auto; grid-template-columns: repeat(2, var(--medal-size)); grid-template-rows: none; justify-content: center; }
 .medal-level-3 { grid-template-rows: repeat(3, var(--medal-size)); }
@@ -215,6 +221,9 @@
   .record-stage strong { min-height: 14px; }
   .record-stage .status-marks { min-height: 14px; }
   .record-level-3 .record-stage { max-width: 142px; }
+  .record-level-4 .record-stage { max-width: 62px; }
+  .book-tabs { margin: -4px 0 7px; }
+  .book-tabs button { min-height: 32px; padding: 6px 10px; font-size: 11px; }
   .medal-grid { --medal-size: min(37vw, calc((100dvh - 286px) / 3)); }
   .medal-card { border-radius: 15px; }
 }
@@ -348,9 +357,6 @@ button:disabled:focus-visible { outline-color: #9eaea8; }
   .status-legend { font-size: 11px; }
   .medal-popup-item small { font-size: 12px; }
 }
-
-/* 凡例は、画面に書いてある文を一度だけ見せる。 */
-.status-legend::before { content: none; }
 
 @media (max-height: 520px) and (orientation: landscape) {
   .range-picks { grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 5px; }

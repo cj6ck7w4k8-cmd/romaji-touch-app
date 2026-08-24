@@ -13,4 +13,16 @@ export const groupNames = Object.keys(kanaGroups)
 export const allKana = Object.values(kanaGroups).flat()
 export const pairs = groupNames.slice(0, -1).map((name, i) => `${name}${groupNames[i + 1]}`)
 export const pairKana = (pair: string) => pair.split('').flatMap((name) => kanaGroups[name])
+
+const dakutenRaw: Record<string, [string, string][]> = {
+  'が': [['が','ga'],['ぎ','gi'],['ぐ','gu'],['げ','ge'],['ご','go']],
+  'ざ': [['ざ','za'],['じ','zi'],['ず','zu'],['ぜ','ze'],['ぞ','zo']],
+  'だ': [['だ','da'],['ぢ','di'],['づ','du'],['で','de'],['ど','do']],
+  'ば': [['ば','ba'],['び','bi'],['ぶ','bu'],['べ','be'],['ぼ','bo']],
+  'ぱ': [['ぱ','pa'],['ぴ','pi'],['ぷ','pu'],['ぺ','pe'],['ぽ','po']],
+}
+export const dakutenGroups: Record<string, Kana[]> = Object.fromEntries(Object.entries(dakutenRaw).map(([group, items]) => [group, items.map(([kana, roma]) => ({ kana, roma, group }))]))
+export const dakutenGroupNames = Object.keys(dakutenGroups)
+export const allDakuten = Object.values(dakutenGroups).flat()
+export const allAvailableKana = [...allKana, ...allDakuten]
 export const shuffle = <T,>(items: T[]) => [...items].sort(() => Math.random() - 0.5)

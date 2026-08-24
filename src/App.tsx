@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { allKana, groupNames, kanaGroups, pairKana, pairs, shuffle, type Kana } from './data'
+import { allAvailableKana, allDakuten, allKana, dakutenGroupNames, dakutenGroups, groupNames, kanaGroups, pairKana, pairs, shuffle, type Kana } from './data'
 import { clearProgress, loadProgress, saveProgress, type Progress } from './storage'
 
 type View = 'home' | 'select' | 'game' | 'result' | 'book' | 'record' | 'medals'
-type Level = 1 | 2 | 3
+type Level = 1 | 2 | 3 | 4
 type Mode = 'practice' | 'challenge'
 export type Choice = { level: Level; set: string; random: boolean; mode: Mode }
 type GameResult = { misses: number; seconds: number }
@@ -46,15 +46,16 @@ export function medalsFor(progress: Progress): MedalId[] {
 export function currentLevelFor(progress: Progress): Level {
   const level2Open = groupNames.every(g => hasAllStageBadges(progress, `1-${g}-normal`))
   const level3Open = pairs.every(p => hasAllStageBadges(progress, `2-${p}-normal`))
-  return level3Open ? 3 : level2Open ? 2 : 1
+  const level4Open = hasBadge(progress, '3-all-normal', 'no-miss')
+  return level4Open ? 4 : level3Open ? 3 : level2Open ? 2 : 1
 }
 
 export function nextStageFor(progress: Progress): Choice {
   const level = currentLevelFor(progress)
   if (level === 1) return { level, set: groupNames.find(group => !hasAllStageBadges(progress, `1-${group}-normal`)) || groupNames[0], random: false, mode: 'challenge' }
   if (level === 2) return { level, set: pairs.find(pair => !hasAllStageBadges(progress, `2-${pair}-normal`)) || pairs[0], random: false, mode: 'challenge' }
-  const random = hasBadge(progress, '3-all-normal', 'no-miss')
-  return { level, set: 'all', random, mode: 'challenge' }
+  if (level === 3) return { level, set: 'all', random: hasBadge(progress, '3-all-normal', 'no-miss'), mode: 'challenge' }
+  return { level, set: dakutenGroupNames.find(group => !hasBadge(progress, `4-${group}-normal`, 'no-miss')) || dakutenGroupNames[0], random: false, mode: 'challenge' }
 }
 
 export function App() {
@@ -67,6 +68,7 @@ export function App() {
   useEffect(() => saveProgress(progress), [progress])
   const level2Open = groupNames.every(g => hasAllStageBadges(progress, `1-${g}-normal`))
   const level3Open = pairs.every(p => hasAllStageBadges(progress, `2-${p}-normal`))
+  const level4Open = hasBadge(progress, '3-all-normal', 'no-miss')
   const currentLevel = currentLevelFor(progress)
   const randomOpen = progress.stars['3-all-normal']?.includes('no-miss')
   const select = (level: Level, set: string, random = false, mode: Mode = 'challenge') => { setChoice({ level, set, random, mode }); setView('game') }
@@ -76,7 +78,7 @@ export function App() {
   return <main className="app-shell">
     <header className="topbar"><button className="brand" onClick={() => nav('home')} aria-label="ほーむへ"><span className="brand-mark">★</span><span className="brand-name">ローマじマスター</span></button><nav><button className={view === 'book' ? 'nav-link active' : 'nav-link'} onClick={() => nav('book')}>いちらん</button><button className={view === 'record' ? 'nav-link active' : 'nav-link'} onClick={() => nav('record')}>きろく</button></nav></header>
     {view === 'home' && <Home progress={progress} currentLevel={currentLevel} onStart={(next) => { setSuggestedChoice(next); nav('select') }} onRecord={() => nav('record')} onMedals={() => nav('medals')} />}
-    {view === 'select' && <Select progress={progress} initialLevel={currentLevel} initialChoice={suggestedChoice} level2Open={level2Open} level3Open={level3Open} randomOpen={randomOpen} onBack={() => nav('home')} onSelect={select} />}
+    {view === 'select' && <Select progress={progress} initialLevel={currentLevel} initialChoice={suggestedChoice} level2Open={level2Open} level3Open={level3Open} level4Open={level4Open} randomOpen={randomOpen} onBack={() => nav('home')} onSelect={select} />}
     {view === 'result' && choice && lastResult && <Result choice={choice} result={lastResult} newMedals={newMedals} onCloseMedals={() => setNewMedals([])} onViewMedals={() => { setNewMedals([]); nav('medals') }} onRetry={() => { setNewMedals([]); nav('game') }} onSelect={() => { setNewMedals([]); setSuggestedChoice(null); nav('select') }} onRecord={() => { setNewMedals([]); nav('record') }} />}
     {view === 'book' && <Book onBack={() => nav('home')} />}
     {view === 'record' && <Record progress={progress} onBack={() => nav('home')} reset={() => { if (confirm('きろくを ぜんぶ けしますか？')) { clearProgress(); setProgress(loadProgress()) } }} />}
@@ -87,31 +89,31 @@ export function App() {
 function Home({ progress, currentLevel, onStart, onRecord, onMedals }: { progress: Progress; currentLevel: Level; onStart: (next: Choice) => void; onRecord: () => void; onMedals: () => void }) {
   const medalCount = medalsFor(progress).length
   const next = nextStageFor(progress)
-  const nextLabel = next.level === 1 ? `レベル1 の「${next.set}」` : next.level === 2 ? `レベル2 の「${next.set.split('').join('・')}」` : next.random ? 'レベル3 の ランダム' : 'レベル3 の じゅんばん'
+  const nextLabel = next.level === 1 ? `レベル1 の「${next.set}」` : next.level === 2 ? `レベル2 の「${next.set.split('').join('・')}」` : next.level === 3 ? next.random ? 'レベル3 の ランダム' : 'レベル3 の じゅんばん' : `レベル4 の「${next.set}」`
   return <section className="home-page"><div className="home-copy"><div className="home-title-line"><div className="home-logo" aria-hidden="true"><b>あ</b><span>→</span><strong>a</strong></div><h1>ローマじを<br /><span>おぼえよう！</span></h1></div><p className="lead">ひらがなを みて、ローマじを えらぼう。</p><div className="home-start"><p className="next-stage">つぎは　<strong>{nextLabel}</strong></p><button className="primary-button primary-action" onClick={() => onStart(next)}>はじめる <span>→</span></button></div><div className="home-status"><button className="home-record" onClick={onRecord} aria-label={`きろくを みる。いまの レベルは レベル${currentLevel}`}><span className="home-record-title">いまの レベル</span><span className="home-record-stats"><strong>レベル{currentLevel}</strong></span></button><button className="home-medal" onClick={onMedals} aria-label={`メダルを みる。${medalCount}こ ゲット`}><span>メダル</span><strong>{medalCount} / 10</strong></button></div></div></section>
 }
 
-function Select({ progress, initialLevel, initialChoice, level2Open, level3Open, randomOpen, onBack, onSelect }: { progress: Progress; initialLevel: Level; initialChoice: Choice | null; level2Open: boolean; level3Open: boolean; randomOpen: boolean; onBack: () => void; onSelect: (level: Level, set: string, random?: boolean, mode?: Mode) => void }) {
-  const startingChoice = initialChoice || { level: initialLevel, set: initialLevel === 1 ? groupNames[0] : initialLevel === 2 ? pairs[0] : 'all', random: false, mode: 'challenge' as Mode }
+function Select({ progress, initialLevel, initialChoice, level2Open, level3Open, level4Open, randomOpen, onBack, onSelect }: { progress: Progress; initialLevel: Level; initialChoice: Choice | null; level2Open: boolean; level3Open: boolean; level4Open: boolean; randomOpen: boolean; onBack: () => void; onSelect: (level: Level, set: string, random?: boolean, mode?: Mode) => void }) {
+  const initialSet = (value: Level) => value === 1 ? groupNames[0] : value === 2 ? pairs[0] : value === 3 ? 'all' : dakutenGroupNames[0]
+  const startingChoice = initialChoice || { level: initialLevel, set: initialSet(initialLevel), random: false, mode: 'challenge' as Mode }
   const [mode, setMode] = useState<Mode>(startingChoice.mode)
   const [level, setLevel] = useState<Level>(startingChoice.level)
   const [set, setSet] = useState(startingChoice.set)
   const [random, setRandom] = useState(startingChoice.random)
-  const chooseLevel = (next: Level) => { if (next === 2 && !level2Open || next === 3 && !level3Open) return; setLevel(next); setSet(next === 1 ? groupNames[0] : next === 2 ? pairs[0] : 'all'); setRandom(false) }
-  const choices = level === 1 ? groupNames : level === 2 ? pairs : ['じゅんばん', 'らんだむ']
+  const chooseLevel = (next: Level) => { if (next === 2 && !level2Open || next === 3 && !level3Open || next === 4 && !level4Open) return; setLevel(next); setSet(initialSet(next)); setRandom(false) }
+  const choices = level === 1 ? groupNames : level === 2 ? pairs : level === 3 ? ['じゅんばん', 'らんだむ'] : dakutenGroupNames
   const chooseSet = (value: string) => { if (level === 3) { if (value === 'らんだむ' && !randomOpen) return; setRandom(value === 'らんだむ'); setSet('all'); return } setSet(value) }
-  const startLabel = level === 1 ? `${set}ぎょうで` : level === 2 ? `${set.split('').join('・')}で` : random ? 'ランダムで' : 'じゅんばんで'
-  const unlockNote = !level2Open ? 'レベル2は レベル1の バッジを ぜんぶ ゲットしたら できるよ。' : !level3Open ? 'レベル3は レベル2の バッジを ぜんぶ ゲットしたら できるよ。' : ''
-  const selectedStatus = stageStatus(progress, { level, set, random, mode: 'challenge' })
-  return <section className="content-page select-page"><button className="back-button" onClick={onBack}>← もどる</button><div className="page-heading compact-heading"><h2>もんだいを えらぼう</h2><p>えらんだら スタートを おしてね。</p></div><div className="choice-box"><div className="choice-row"><span>モード</span><div className="mode-choice" aria-label="モードを えらぶ"><button aria-pressed={mode === 'practice'} className={mode === 'practice' ? 'selected' : ''} onClick={() => setMode('practice')}>れんしゅう</button><button aria-pressed={mode === 'challenge'} className={mode === 'challenge' ? 'selected' : ''} onClick={() => setMode('challenge')}>ほんばん</button></div></div><div className="choice-row level-row"><span>レベル</span><div className="level-picks"><button aria-pressed={level === 1} className={level === 1 ? 'selected' : ''} onClick={() => chooseLevel(1)}>1</button><button disabled={!level2Open} aria-pressed={level === 2} className={level === 2 ? 'selected' : ''} onClick={() => chooseLevel(2)}>2</button><button disabled={!level3Open} aria-pressed={level === 3} className={level === 3 ? 'selected' : ''} onClick={() => chooseLevel(3)}>3</button></div>{unlockNote && <p className="unlock-note">{unlockNote}</p>}</div><div className="choice-row range-row"><span>{level === 1 ? 'ぎょう' : level === 2 ? 'くみ' : 'ならびかた'}</span><div className={`range-picks ${level === 3 ? 'level-three-picks' : ''}`}>{choices.map(value => { const nextRandom = level === 3 && value === 'らんだむ'; const nextSet = level === 3 ? 'all' : value; const selected = level < 3 ? set === value : random === nextRandom; const status = stageStatus(progress, { level, set: nextSet, random: nextRandom, mode: 'challenge' }); return <button disabled={level === 3 && value === 'らんだむ' && !randomOpen} aria-pressed={selected} className={selected ? 'selected' : ''} key={value} onClick={() => chooseSet(value)}><span>{level === 2 ? value.split('').join('・') : value === 'らんだむ' ? 'ランダム' : value}</span><StatusMarks status={status} showEmpty /></button> })}</div></div><p className="status-legend">★ まちがえなし　⚡ はやくできた<br />きろくが のこるのは ほんばん だけ</p><button className="start-button primary-action" onClick={() => onSelect(level, set, random, mode)}>レベル{level}　{startLabel}　スタート →</button></div></section>
+  const startLabel = level === 1 || level === 4 ? `${set}ぎょうで` : level === 2 ? `${set.split('').join('・')}で` : random ? 'ランダムで' : 'じゅんばんで'
+  const unlockNote = !level2Open ? 'レベル2は レベル1の バッジを ぜんぶ ゲットしたら できるよ。' : !level3Open ? 'レベル3は レベル2の バッジを ぜんぶ ゲットしたら できるよ。' : !level4Open ? 'レベル4は レベル3の じゅんばんを まちがえずに クリアしたら できるよ。' : ''
+  return <section className="content-page select-page"><button className="back-button" onClick={onBack}>← もどる</button><div className="page-heading compact-heading"><h2>もんだいを えらぼう</h2><p>えらんだら スタートを おしてね。</p></div><div className={`choice-box ${level >= 3 ? 'single-badge-level' : ''}`}><div className="choice-row"><span>モード</span><div className="mode-choice" aria-label="モードを えらぶ"><button aria-pressed={mode === 'practice'} className={mode === 'practice' ? 'selected' : ''} onClick={() => setMode('practice')}>れんしゅう</button><button aria-pressed={mode === 'challenge'} className={mode === 'challenge' ? 'selected' : ''} onClick={() => setMode('challenge')}>ほんばん</button></div></div><div className="choice-row level-row"><span>レベル</span><div className="level-picks"><button aria-pressed={level === 1} className={level === 1 ? 'selected' : ''} onClick={() => chooseLevel(1)}>1</button><button disabled={!level2Open} aria-pressed={level === 2} className={level === 2 ? 'selected' : ''} onClick={() => chooseLevel(2)}>2</button><button disabled={!level3Open} aria-pressed={level === 3} className={level === 3 ? 'selected' : ''} onClick={() => chooseLevel(3)}>3</button><button disabled={!level4Open} aria-pressed={level === 4} className={level === 4 ? 'selected' : ''} onClick={() => chooseLevel(4)}>4</button></div>{unlockNote && <p className="unlock-note">{unlockNote}</p>}</div><div className="choice-row range-row"><span>{level === 1 || level === 4 ? 'ぎょう' : level === 2 ? 'くみ' : 'ならびかた'}</span><div className={`range-picks ${level === 3 ? 'level-three-picks' : ''}`}>{choices.map(value => { const nextRandom = level === 3 && value === 'らんだむ'; const nextSet = level === 3 ? 'all' : value; const selected = level === 3 ? random === nextRandom : set === value; const status = stageStatus(progress, { level, set: nextSet, random: nextRandom, mode: 'challenge' }); return <button disabled={level === 3 && value === 'らんだむ' && !randomOpen} aria-pressed={selected} className={selected ? 'selected' : ''} key={value} onClick={() => chooseSet(value)}><span>{level === 2 ? value.split('').join('・') : value === 'らんだむ' ? 'ランダム' : value}</span><StatusMarks status={status} showEmpty showSpeed={level < 3} /></button> })}</div></div><p className="status-legend">{level < 3 ? '★ まちがえなし　⚡ はやくできた' : '★ まちがえなし'}<br />きろくが のこるのは ほんばん だけ</p><button className="start-button primary-action" onClick={() => onSelect(level, set, random, mode)}>レベル{level}　{startLabel}　スタート →</button></div></section>
 }
 
 function Game({ choice, back, finish }: { choice: Choice; back: () => void; finish: (result: GameResult) => void }) {
-  const questions = useMemo(() => { const source: Kana[] = choice.level === 1 ? kanaGroups[choice.set] : choice.level === 2 ? pairKana(choice.set) : allKana; return choice.random ? shuffle(source) : source }, [choice])
+  const questions = useMemo(() => { const source: Kana[] = choice.level === 1 ? kanaGroups[choice.set] : choice.level === 2 ? pairKana(choice.set) : choice.level === 3 ? allKana : dakutenGroups[choice.set]; return choice.random ? shuffle(source) : source }, [choice])
   const [index, setIndex] = useState(0), [, setMisses] = useState(0), [combo, setCombo] = useState(0), [hint, setHint] = useState(false), [hintUsed, setHintUsed] = useState(false), [started] = useState(Date.now()), [wrong, setWrong] = useState<string | null>(null)
   const missesRef = useRef(0)
   const q = questions[index]
-  const options = useMemo(() => shuffle([q.roma, ...shuffle(allKana.filter(x => x.roma !== q.roma)).slice(0, choice.level === 2 ? 9 : 4).map(x => x.roma)]), [q, choice.level])
+  const options = useMemo(() => shuffle([q.roma, ...shuffle(allAvailableKana.filter(x => x.roma !== q.roma)).slice(0, choice.level === 2 ? 9 : 4).map(x => x.roma)]), [q, choice.level])
   useEffect(() => { if (choice.mode === 'practice') { const timer = setTimeout(() => setHint(true), 3000); return () => clearTimeout(timer) } }, [index, choice.mode])
   const addMiss = () => { missesRef.current += 1; setMisses(m => m + 1) }
   const useHint = () => { if (!hintUsed) { setHintUsed(true); addMiss() }; setHint(true) }
@@ -121,12 +123,12 @@ function Game({ choice, back, finish }: { choice: Choice; back: () => void; fini
 
 export function resultStars(choice: Choice, result: GameResult) {
   if (choice.mode === 'practice') return []
-  const count = choice.level === 1 ? kanaGroups[choice.set].length : choice.level === 2 ? pairKana(choice.set).length : allKana.length
+  const count = choice.level === 1 ? kanaGroups[choice.set].length : choice.level === 2 ? pairKana(choice.set).length : choice.level === 3 ? allKana.length : dakutenGroups[choice.set].length
   return [result.misses === 0 ? 'no-miss' : '', choice.level < 3 && result.seconds < count * 2 ? 'speed' : ''].filter(Boolean)
 }
 
 export function questionCount(choice: Choice) {
-  return choice.level === 1 ? kanaGroups[choice.set].length : choice.level === 2 ? pairKana(choice.set).length : allKana.length
+  return choice.level === 1 ? kanaGroups[choice.set].length : choice.level === 2 ? pairKana(choice.set).length : choice.level === 3 ? allKana.length : dakutenGroups[choice.set].length
 }
 
 export function progressBadges(progress: Progress) {
@@ -140,9 +142,9 @@ export function stageStatus(progress: Progress, choice: Choice) {
   return { completed: progress.completed.includes(key), noMiss: stars.includes('no-miss'), speed: stars.includes('speed'), bestTime: progress.bestTimes[key] }
 }
 
-function StatusMarks({ status, showEmpty = false }: { status: ReturnType<typeof stageStatus>; showEmpty?: boolean }) {
+function StatusMarks({ status, showEmpty = false, showSpeed = true }: { status: ReturnType<typeof stageStatus>; showEmpty?: boolean; showSpeed?: boolean }) {
   if (!showEmpty && !status.completed && !status.noMiss && !status.speed) return null
-  const badges = [{ mark: '★', earned: status.noMiss, label: 'まちがえなし', kind: 'no-miss-badge' }, { mark: '⚡', earned: status.speed, label: 'はやくできた', kind: 'speed-badge' }]
+  const badges = [{ mark: '★', earned: status.noMiss, label: 'まちがえなし', kind: 'no-miss-badge' }, ...(showSpeed ? [{ mark: '⚡', earned: status.speed, label: 'はやくできた', kind: 'speed-badge' }] : [])]
   return <span className={status.completed ? 'status-marks completed' : 'status-marks'} aria-label={badges.filter(badge => badge.earned).map(badge => badge.label).join('　') || 'まだ バッジがない'}>{badges.map(badge => <i className={badge.earned ? `filled ${badge.kind}` : ''} key={badge.mark} aria-hidden="true">{badge.earned ? badge.mark : ''}</i>)}{status.bestTime !== undefined && <small>{status.bestTime.toFixed(1)}びょう</small>}</span>
 }
 
@@ -153,7 +155,7 @@ function Result({ choice, result, newMedals, onCloseMedals, onViewMedals, onRetr
   const mainActionRef = useRef<HTMLButtonElement>(null)
   const missedBadges = choice.mode === 'challenge' && (!clean || (choice.level < 3 && !quick))
   const closeMedalPopup = () => { onCloseMedals(); requestAnimationFrame(() => mainActionRef.current?.focus()) }
-  return <section className="result-page"><div className="result-card"><p className="eyebrow">よく できました！</p><div className="result-mark" aria-hidden="true">{choice.mode === 'practice' ? '☺' : clean ? '★' : '○'}</div><h2>{questionCount(choice)}もん できたよ！</h2>{choice.mode === 'practice' ? <p className="result-copy">れんしゅうを おわったよ。<br />つぎは ほんばんにも ちょうせんしてみよう！</p> : <><p className="result-copy">{clean ? 'まちがえずに できたね！' : 'さいごまで がんばったね！'}</p><p className="earned-label">こんかいの バッジ</p><div className="earned-stars"><span className={`badge-slot ${clean ? 'earned' : ''}`}><i aria-hidden="true">{clean ? '★' : ''}</i><small>まちがえ なし</small></span>{choice.level < 3 && <span className={`badge-slot ${quick ? 'earned' : ''}`}><i aria-hidden="true">{quick ? '⚡' : ''}</i><small>はやく できた</small></span>}</div><p className="result-note">{choice.level === 3 ? `こんかいは ${result.seconds.toFixed(1)} びょう だったよ` : missedBadges ? 'つぎは まちがえなしで バッジを ゲットしよう！' : '⚡は 1もじ 2びょうより はやいと もらえるよ'}</p></>}<div className="result-actions">{choice.mode === 'practice' ? <button ref={mainActionRef} className="primary-button primary-action" onClick={onSelect}>ほんばんを えらぶ</button> : <div className="result-primary-actions"><button className="retry-button" onClick={onRetry}>もう いちど</button><button ref={mainActionRef} className="next-button primary-action" onClick={onSelect}>ほかの もんだいを えらぶ →</button></div>}<button className="result-record" onClick={onRecord}>きろくを みる →</button></div></div>{newMedals.length > 0 && <MedalPopup medals={newMedals} onClose={closeMedalPopup} onView={onViewMedals} />}</section>
+  return <section className="result-page"><div className="result-card"><p className="eyebrow">よく できました！</p><div className="result-mark" aria-hidden="true">{choice.mode === 'practice' ? '☺' : clean ? '★' : '○'}</div><h2>{questionCount(choice)}もん できたよ！</h2>{choice.mode === 'practice' ? <p className="result-copy">れんしゅうを おわったよ。<br />つぎは ほんばんにも ちょうせんしてみよう！</p> : <><p className="result-copy">{clean ? 'まちがえずに できたね！' : 'さいごまで がんばったね！'}</p><p className="earned-label">こんかいの バッジ</p><div className="earned-stars"><span className={`badge-slot ${clean ? 'earned' : ''}`}><i aria-hidden="true">{clean ? '★' : ''}</i><small>まちがえ なし</small></span>{choice.level < 3 && <span className={`badge-slot ${quick ? 'earned' : ''}`}><i aria-hidden="true">{quick ? '⚡' : ''}</i><small>はやく できた</small></span>}</div><p className="result-note">{choice.level === 3 ? `こんかいは ${result.seconds.toFixed(1)} びょう だったよ` : choice.level === 4 && clean ? 'まちがえなし バッジを ゲット！' : missedBadges ? 'つぎは まちがえなしで バッジを ゲットしよう！' : '⚡は 1もじ 2びょうより はやいと もらえるよ'}</p></>}<div className="result-actions">{choice.mode === 'practice' ? <button ref={mainActionRef} className="primary-button primary-action" onClick={onSelect}>ほんばんを えらぶ</button> : <div className="result-primary-actions"><button className="retry-button" onClick={onRetry}>もう いちど</button><button ref={mainActionRef} className="next-button primary-action" onClick={onSelect}>ほかの もんだいを えらぶ →</button></div>}<button className="result-record" onClick={onRecord}>きろくを みる →</button></div></div>{newMedals.length > 0 && <MedalPopup medals={newMedals} onClose={closeMedalPopup} onView={onViewMedals} />}</section>
 }
 
 function MedalPopup({ medals, onClose, onView, detail }: { medals: MedalId[]; onClose: () => void; onView?: () => void; detail?: boolean }) {
@@ -175,7 +177,9 @@ function Medals({ progress, onBack }: { progress: Progress; onBack: () => void }
 }
 
 function Book({ onBack }: { onBack: () => void }) {
-  return <section className="content-page book-page"><button className="back-button" onClick={onBack}>← もどる</button><div className="page-heading"><p className="eyebrow">いつでも かくにん</p><h2>いちらん</h2><p>もじと ローマじを みくらべてみよう。</p></div><div className="kana-chart book-chart" aria-label="ひらがなと ローマじの いちらん">{allKana.map(x => <div className="kana-item" key={x.kana}><b>{x.kana}</b><span>{x.roma}</span></div>)}</div></section>
+  const [part, setPart] = useState<1 | 4>(1)
+  const items = part === 1 ? allKana : allDakuten
+  return <section className="content-page book-page"><button className="back-button" onClick={onBack}>← もどる</button><div className="page-heading"><p className="eyebrow">いつでも かくにん</p><h2>いちらん</h2><p>もじと ローマじを みくらべてみよう。</p></div><div className="book-tabs" aria-label="いちらんの レベルを えらぶ"><button className={part === 1 ? 'selected' : ''} aria-pressed={part === 1} onClick={() => setPart(1)}>レベル1〜3</button><button className={part === 4 ? 'selected' : ''} aria-pressed={part === 4} onClick={() => setPart(4)}>レベル4</button></div><div className="kana-chart book-chart" aria-label="ひらがなと ローマじの いちらん">{items.map(x => <div className="kana-item" key={x.kana}><b>{x.kana}</b><span>{x.roma}</span></div>)}</div></section>
 }
 function Record({ progress, onBack, reset }: { progress: Progress; onBack: () => void; reset: () => void }) {
   const [level, setLevel] = useState<Level>(1)
@@ -183,8 +187,10 @@ function Record({ progress, onBack, reset }: { progress: Progress; onBack: () =>
     ? groupNames.map(set => ({ label: set, choice: { level: 1 as Level, set, random: false, mode: 'challenge' as Mode } }))
     : level === 2
       ? pairs.map(set => ({ label: set.split('').join('・'), choice: { level: 2 as Level, set, random: false, mode: 'challenge' as Mode } }))
-      : [{ label: 'じゅんばん', choice: { level: 3 as Level, set: 'all', random: false, mode: 'challenge' as Mode } }, { label: 'ランダム', choice: { level: 3 as Level, set: 'all', random: true, mode: 'challenge' as Mode } }]
-  return <section className="content-page record-page"><button className="back-button" onClick={onBack}>← もどる</button><div className="page-heading record-heading"><h2>きろく</h2><p>クリアした ステージに いろが つくよ。</p></div><div className="record-level-tabs" aria-label="レベルを えらぶ">{([1, 2, 3] as Level[]).map(value => <button aria-pressed={level === value} className={level === value ? 'selected' : ''} onClick={() => setLevel(value)} key={value}>レベル{value}</button>)}</div><div className={`record-stage-grid record-level-${level}`}>{stages.map(({ label, choice }) => { const status = stageStatus(progress, choice); return <div className={`record-stage ${status.completed ? 'completed' : ''}`} key={id(choice)}><strong>{label}</strong><StatusMarks status={status} showEmpty />{level === 3 && <small className="record-time">{status.bestTime === undefined ? 'さいたん －' : `さいたん ${status.bestTime.toFixed(1)}びょう`}</small>}</div> })}</div><button className="reset-button" onClick={reset}>きろくを リセット</button></section>
+      : level === 3
+        ? [{ label: 'じゅんばん', choice: { level: 3 as Level, set: 'all', random: false, mode: 'challenge' as Mode } }, { label: 'ランダム', choice: { level: 3 as Level, set: 'all', random: true, mode: 'challenge' as Mode } }]
+        : dakutenGroupNames.map(set => ({ label: set, choice: { level: 4 as Level, set, random: false, mode: 'challenge' as Mode } }))
+  return <section className="content-page record-page"><button className="back-button" onClick={onBack}>← もどる</button><div className="page-heading record-heading"><h2>きろく</h2><p>クリアした ステージに いろが つくよ。</p></div><div className="record-level-tabs" aria-label="レベルを えらぶ">{([1, 2, 3, 4] as Level[]).map(value => <button aria-pressed={level === value} className={level === value ? 'selected' : ''} onClick={() => setLevel(value)} key={value}>レベル{value}</button>)}</div><div className={`record-stage-grid record-level-${level}`}>{stages.map(({ label, choice }) => { const status = stageStatus(progress, choice); return <div className={`record-stage ${status.completed ? 'completed' : ''}`} key={id(choice)}><strong>{label}</strong><StatusMarks status={status} showEmpty showSpeed={level < 3} />{level === 3 && <small className="record-time">{status.bestTime === undefined ? 'さいたん －' : `さいたん ${status.bestTime.toFixed(1)}びょう`}</small>}</div> })}</div><button className="reset-button" onClick={reset}>きろくを リセット</button></section>
 }
 
 export function finish(progress: Progress, choice: Choice, result: { misses: number; seconds: number }): Progress { if (choice.mode === 'practice') return progress; const key = id(choice); const stars = [...(progress.stars[key] || [])]; if (result.misses === 0 && !stars.includes('no-miss')) stars.push('no-miss'); if (choice.level < 3 && result.seconds < (choice.level === 1 ? kanaGroups[choice.set].length : pairKana(choice.set).length) * 2 && !stars.includes('speed')) stars.push('speed'); const best = progress.bestTimes[key]; return { ...progress, completed: [...new Set([...progress.completed, key])], stars: { ...progress.stars, [key]: stars }, bestTimes: choice.level === 3 && (!best || result.seconds < best) ? { ...progress.bestTimes, [key]: result.seconds } : progress.bestTimes } }

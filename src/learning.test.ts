@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { allKana, groupNames, kanaGroups, pairKana, pairs, shuffle } from './data'
+import { allKana, dakutenGroupNames, dakutenGroups, groupNames, kanaGroups, pairKana, pairs, shuffle } from './data'
 import { currentLevelFor, finish, medalsFor, nextStageFor, progressBadges, questionCount, resultStars, stageStatus } from './App'
 import { emptyProgress } from './storage'
 
@@ -9,6 +9,9 @@ describe('もんだいでーた', () => {
     expect(allKana.find(x => x.kana === 'つ')?.roma).toBe('tu')
     expect(kanaGroups['あ']).toHaveLength(5)
     expect(pairKana('あか')).toHaveLength(10)
+    expect(dakutenGroupNames).toEqual(['が', 'ざ', 'だ', 'ば', 'ぱ'])
+    expect(dakutenGroups['ざ'].find(x => x.kana === 'じ')?.roma).toBe('zi')
+    expect(dakutenGroups['だ'].find(x => x.kana === 'ぢ')?.roma).toBe('di')
   })
   it('しゃっふるで もとの もじを なくさない', () => {
     expect(shuffle(['a','b','c']).sort()).toEqual(['a','b','c'])
@@ -73,7 +76,18 @@ describe('きろく', () => {
     expect(nextStageFor(level1)).toMatchObject({ level: 1, set: 'か', random: false })
     expect(nextStageFor(level2)).toMatchObject({ level: 2, set: pairs[0], random: false })
     expect(nextStageFor(level3)).toMatchObject({ level: 3, set: 'all', random: false })
-    expect(nextStageFor({ ...level3, stars: { ...level3.stars, '3-all-normal': ['no-miss'] } })).toMatchObject({ level: 3, set: 'all', random: true })
+    expect(nextStageFor({ ...level3, stars: { ...level3.stars, '3-all-normal': ['no-miss'] } })).toMatchObject({ level: 4, set: 'が', random: false })
+  })
+  it('レベル4は まちがえなしだけを きろくする', () => {
+    const choice = {level:4 as const,set:'が',random:false,mode:'challenge' as const}
+    expect(questionCount(choice)).toBe(5)
+    expect(resultStars(choice, {misses:0,seconds:1})).toEqual(['no-miss'])
+    expect(finish(emptyProgress(), choice, {misses:0,seconds:1}).stars['4-が-normal']).toEqual(['no-miss'])
+  })
+  it('レベル4は できたぎょうの つぎを あんないする', () => {
+    const level4Open = { ...emptyProgress(), stars: { '3-all-normal': ['no-miss'], '4-が-normal': ['no-miss'] } }
+    expect(nextStageFor(level4Open)).toMatchObject({ level: 4, set: 'ざ', random: false })
+    expect(dakutenGroupNames.every(group => questionCount({ level: 4, set: group, random: false, mode: 'challenge' }) === 5)).toBe(true)
   })
   it('れべる1と2の ぜんぶの バッジから メダルを きめる', () => {
     const progress = {
