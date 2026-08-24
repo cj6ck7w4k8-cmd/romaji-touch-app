@@ -175,11 +175,7 @@ function Medals({ progress, onBack }: { progress: Progress; onBack: () => void }
 }
 
 function Book({ onBack }: { onBack: () => void }) {
-  const [groupIndex, setGroupIndex] = useState(0)
-  const group = groupNames[groupIndex]
-  const previous = () => setGroupIndex(index => Math.max(0, index - 1))
-  const next = () => setGroupIndex(index => Math.min(groupNames.length - 1, index + 1))
-  return <section className="content-page book-page"><button className="back-button" onClick={onBack}>← もどる</button><div className="page-heading"><p className="eyebrow">いつでも かくにん</p><h2>いちらん</h2><p>もじと ローマじを みくらべてみよう。</p></div><div className="book-pager" aria-label="ぎょうを えらぶ"><button aria-label="まえの ぎょう" onClick={previous} disabled={groupIndex === 0}>←</button><strong>{group}ぎょう</strong><span>{groupIndex + 1} / {groupNames.length}</span><button aria-label="つぎの ぎょう" onClick={next} disabled={groupIndex === groupNames.length - 1}>→</button></div><div className="kana-chart book-chart">{kanaGroups[group].map(x => <div className="kana-item" key={x.kana}><b>{x.kana}</b><span>{x.roma}</span></div>)}</div></section>
+  return <section className="content-page book-page"><button className="back-button" onClick={onBack}>← もどる</button><div className="page-heading"><p className="eyebrow">いつでも かくにん</p><h2>いちらん</h2><p>もじと ローマじを みくらべてみよう。</p></div><div className="kana-chart book-chart" aria-label="ひらがなと ローマじの いちらん">{allKana.map(x => <div className="kana-item" key={x.kana}><b>{x.kana}</b><span>{x.roma}</span></div>)}</div></section>
 }
 function Record({ progress, onBack, reset }: { progress: Progress; onBack: () => void; reset: () => void }) {
   const [level, setLevel] = useState<Level>(1)
