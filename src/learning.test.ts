@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { allKana, dakutenGroupNames, dakutenGroups, groupNames, kanaGroups, pairKana, pairs, shortWords, shuffle, voicedYouonGroupNames, voicedYouonGroups, youonGroupNames, youonGroups } from './data'
-import { currentLevelFor, finish, medalsFor, nextStageFor, progressBadges, questionCount, resultStars, stageStatus } from './App'
+import { currentLevelFor, finish, medalsFor, nextStageFor, progressBadges, questionCount, questionPool, resultStars, stageStatus } from './App'
 import { emptyProgress } from './storage'
 
 describe('もんだいでーた', () => {
@@ -18,6 +18,14 @@ describe('もんだいでーた', () => {
   })
   it('しゃっふるで もとの もじを なくさない', () => {
     expect(shuffle(['a','b','c']).sort()).toEqual(['a','b','c'])
+  })
+  it('せんたくしは いまの がくしゅう はんいだけから えらぶ', () => {
+    expect(questionPool({ level: 1, set: 'あ', random: false, mode: 'challenge' }).map(item => item.roma)).toEqual(['a', 'i', 'u', 'e', 'o'])
+    expect(questionPool({ level: 1, set: 'や', random: false, mode: 'challenge' }).map(item => item.roma)).toEqual(['ya', 'yu', 'yo'])
+    expect(questionPool({ level: 2, set: 'あか', random: false, mode: 'challenge' })).toHaveLength(10)
+    expect(questionPool({ level: 4, set: 'が', random: false, mode: 'challenge' }).map(item => item.roma)).toEqual(['ga', 'gi', 'gu', 'ge', 'go'])
+    expect(questionPool({ level: 5, set: 'しゃ', random: false, mode: 'challenge' }).map(item => item.roma)).toEqual(['sya', 'syu', 'syo'])
+    expect(questionPool({ level: 8, set: 'words', random: true, mode: 'challenge' })).toEqual(shortWords)
   })
 })
 
