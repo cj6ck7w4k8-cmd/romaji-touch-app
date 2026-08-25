@@ -282,6 +282,8 @@
 /* すべての押せる部品で、キーボードの現在地を見失わない。 */
 button:focus-visible { outline: 3px solid #176875; outline-offset: 3px; }
 button:disabled:focus-visible { outline-color: #9eaea8; }
+.answer.wrong:focus-visible { outline-color: #d97256; }
+.answer.right:focus-visible { outline-color: #328144; }
 
 /* 横向きの低い画面では、全体を縮小せず、補助情報を減らして主操作を残す。 */
 @media (max-height: 520px) and (orientation: landscape) {
