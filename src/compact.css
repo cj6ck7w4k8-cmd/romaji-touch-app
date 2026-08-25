@@ -264,6 +264,9 @@
 .record-level-5 .record-stage:not(.completed) .status-marks i, .record-level-6 .record-stage:not(.completed) .status-marks i, .record-level-7 .record-stage:not(.completed) .status-marks i, .record-level-8 .record-stage:not(.completed) .status-marks i { border-color: #aebdb7; background: #e1e7e4; }
 .word-chart { grid-template-columns: repeat(5, minmax(0, 1fr)); }
 .word-chart .kana-item b { font-size: 21px; }
+.record-level-tabs .level-tab-short { display: none; }
+.selected-level { display: flex; align-items: baseline; justify-content: center; gap: 9px; padding: 8px 0 10px; border-bottom: 1px solid #edf2ef; color: #718a93; font-size: 12px; font-weight: 900; }
+.selected-level strong { color: #176875; font-size: 18px; }
 
 @media (max-width: 720px) {
   .level-row .level-picks { grid-template-columns: repeat(4, minmax(36px, 1fr)); width: 100%; }
@@ -273,6 +276,7 @@
   .word-chart { grid-template-columns: repeat(3, minmax(0, 1fr)); overflow-y: auto; align-content: start; }
   .word-chart .kana-item { min-height: 46px; }
   .word-chart .kana-item b { font-size: 16px; }
+  .selected-level { padding: 6px 0 8px; }
 }
 
 /* すべての押せる部品で、キーボードの現在地を見失わない。 */
@@ -304,6 +308,11 @@ button:disabled:focus-visible { outline-color: #9eaea8; }
   .choice-box { padding: 7px 12px; border-radius: 18px; box-shadow: 0 4px 0 #edf3ed; }
   .choice-row { padding: 3px 0; }
   .choice-row > span { font-size: 11px; }
+  .level-row { display: block; }
+  .level-row > span { display: block; width: auto; padding: 0 0 3px; }
+  .level-row .level-picks { grid-template-columns: repeat(8, minmax(40px, 1fr)); width: 100%; }
+  .selected-level { padding: 4px 0 6px; font-size: 10px; }
+  .selected-level strong { font-size: 15px; }
   .mode-choice button, .level-picks button, .range-picks button { min-height: 40px; padding: 6px 10px; font-size: 13px; }
   .range-picks { grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 5px; }
   .range-picks button { min-width: 0; padding: 5px 2px; }
@@ -355,12 +364,24 @@ button:disabled:focus-visible { outline-color: #9eaea8; }
   .record-heading h2 { font-size: 23px; }
   .record-heading p { font-size: 10px; }
   .record-level-tabs { margin-bottom: 5px; }
-  .record-level-tabs button { min-height: 34px; }
+  .record-level-tabs { grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 3px; }
+  .record-level-tabs button { min-height: 30px; font-size: 13px; }
+  .record-level-tabs .level-tab-full { display: none; }
+  .record-level-tabs .level-tab-short { display: inline; }
   .record-stage-grid { gap: 5px; }
+  .record-stage-grid.compact-stage-page { grid-template-columns: repeat(5, minmax(0, 1fr)); grid-template-rows: none; max-width: none; }
+  .record-stage-grid.compact-stage-page .record-stage { max-width: none; min-height: 0; }
   .record-stage { min-height: 0; }
   .record-stage strong { font-size: 11px; }
   .record-stage .status-marks i { width: 13px; height: 13px; }
   .record-page .reset-button { min-height: 30px; margin-top: 4px; font-size: 10px; }
+  .record-page-controls { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 4px; color: #718a93; font-size: 11px; font-weight: 900; }
+  .record-page-controls button { min-height: 28px; padding: 4px 9px; border-radius: 10px; background: #edf4f1; color: #176875; font-size: 11px; font-weight: 900; }
+  .record-page-controls button:disabled { opacity: .35; }
+}
+
+@media (min-height: 521px), (orientation: portrait) {
+  .record-level-tabs .level-tab-short { display: none; }
 }
 
 @media (max-width: 720px) {
