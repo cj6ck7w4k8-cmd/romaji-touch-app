@@ -154,6 +154,18 @@ export function resultStars(choice: Choice, result: GameResult) {
   return [result.misses === 0 ? 'no-miss' : '', choice.level < 3 && result.seconds < count * 2 ? 'speed' : ''].filter(Boolean)
 }
 
+export function resultFeedback(choice: Choice, result: GameResult) {
+  const stars = resultStars(choice, result)
+  const clean = stars.includes('no-miss')
+  const quick = stars.includes('speed')
+  if (choice.level === 3) return `こんかいは ${result.seconds.toFixed(1)} びょう だったよ`
+  if (choice.level >= 4) return clean ? 'まちがえなし バッジを ゲット！' : 'つぎは まちがえなしで バッジを ゲットしよう！'
+  if (clean && quick) return 'バッジを 2こ ゲット！'
+  if (clean) return '★ バッジを ゲット！ つぎは はやさにも ちょうせん！'
+  if (quick) return '⚡ バッジを ゲット！ つぎは まちがえなしに ちょうせん！'
+  return 'つぎは まちがえなしで バッジを ゲットしよう！'
+}
+
 export function questionCount(choice: Choice) {
   return choice.level === 1 ? kanaGroups[choice.set].length : choice.level === 2 ? pairKana(choice.set).length : choice.level === 3 ? allKana.length : choice.level === 4 ? dakutenGroups[choice.set].length : choice.level === 5 ? youonGroups[choice.set].length : choice.level === 6 ? voicedYouonGroups[choice.set].length : choice.level === 7 ? 30 : 10
 }
@@ -180,9 +192,8 @@ function Result({ choice, result, newMedals, onCloseMedals, onViewMedals, onRetr
   const clean = stars.includes('no-miss')
   const quick = stars.includes('speed')
   const mainActionRef = useRef<HTMLButtonElement>(null)
-  const missedBadges = choice.mode === 'challenge' && (!clean || (choice.level < 3 && !quick))
   const closeMedalPopup = () => { onCloseMedals(); requestAnimationFrame(() => mainActionRef.current?.focus()) }
-  return <section className="result-page"><div className="result-card"><p className="eyebrow">よく できました！</p><div className="result-mark" aria-hidden="true">{choice.mode === 'practice' ? '☺' : '◎'}</div><h2>{questionCount(choice)}もん できたよ！</h2>{choice.mode === 'practice' ? <p className="result-copy">れんしゅうを おわったよ。<br />つぎは ほんばんにも ちょうせんしてみよう！</p> : <><p className="result-copy">{clean ? 'まちがえずに できたね！' : 'さいごまで がんばったね！'}</p><p className="earned-label">こんかいの バッジ</p><div className="earned-stars"><span className={`badge-slot ${clean ? 'earned' : ''}`}><i aria-hidden="true">{clean ? '★' : ''}</i><small>まちがえ なし</small></span>{choice.level < 3 && <span className={`badge-slot ${quick ? 'earned' : ''}`}><i aria-hidden="true">{quick ? '⚡' : ''}</i><small>はやく できた</small></span>}</div><p className="result-note">{choice.level === 3 ? `こんかいは ${result.seconds.toFixed(1)} びょう だったよ` : choice.level >= 4 && clean ? 'まちがえなし バッジを ゲット！' : missedBadges ? 'つぎは まちがえなしで バッジを ゲットしよう！' : '⚡は 1もじ 2びょうより はやいと もらえるよ'}</p></>}<div className="result-actions">{choice.mode === 'practice' ? <button ref={mainActionRef} className="primary-button primary-action" onClick={onSelect}>ほんばんを えらぶ</button> : <div className="result-primary-actions"><button className="retry-button" onClick={onRetry}>もう いちど</button><button ref={mainActionRef} className="next-button primary-action" onClick={onSelect}>ほかの もんだい →</button></div>}<button className="result-record" onClick={onRecord}>きろくを みる →</button></div></div>{newMedals.length > 0 && <MedalPopup medals={newMedals} onClose={closeMedalPopup} onView={onViewMedals} />}</section>
+  return <section className="result-page"><div className="result-card"><p className="eyebrow">よく できました！</p><div className="result-mark" aria-hidden="true">{choice.mode === 'practice' ? '☺' : '◎'}</div><h2>{questionCount(choice)}もん できたよ！</h2>{choice.mode === 'practice' ? <p className="result-copy">れんしゅうを おわったよ。<br />つぎは ほんばんにも ちょうせんしてみよう！</p> : <><p className="result-copy">{clean ? 'まちがえずに できたね！' : 'さいごまで がんばったね！'}</p><p className="earned-label">こんかいの バッジ</p><div className="earned-stars"><span className={`badge-slot ${clean ? 'earned' : ''}`}><i aria-hidden="true">{clean ? '★' : ''}</i><small>まちがえ なし</small></span>{choice.level < 3 && <span className={`badge-slot ${quick ? 'earned' : ''}`}><i aria-hidden="true">{quick ? '⚡' : ''}</i><small>はやく できた</small></span>}</div><p className="result-note">{resultFeedback(choice, result)}</p></>}<div className="result-actions">{choice.mode === 'practice' ? <button ref={mainActionRef} className="primary-button primary-action" onClick={onSelect}>ほんばんを えらぶ</button> : <div className="result-primary-actions"><button className="retry-button" onClick={onRetry}>もう いちど</button><button ref={mainActionRef} className="next-button primary-action" onClick={onSelect}>ほかの もんだい →</button></div>}<button className="result-record" onClick={onRecord}>きろくを みる →</button></div></div>{newMedals.length > 0 && <MedalPopup medals={newMedals} onClose={closeMedalPopup} onView={onViewMedals} />}</section>
 }
 
 function MedalPopup({ medals, onClose, onView, detail }: { medals: MedalId[]; onClose: () => void; onView?: () => void; detail?: boolean }) {

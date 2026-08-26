@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { allKana, dakutenGroupNames, dakutenGroups, groupNames, kanaGroups, pairKana, pairs, shortWords, shuffle, voicedYouonGroupNames, voicedYouonGroups, youonGroupNames, youonGroups } from './data'
-import { currentLevelFor, finish, medalsFor, nextStageFor, progressBadges, questionCount, questionPool, resultStars, stageStatus } from './App'
+import { currentLevelFor, finish, medalsFor, nextStageFor, progressBadges, questionCount, questionPool, resultFeedback, resultStars, stageStatus } from './App'
 import { emptyProgress } from './storage'
 
 describe('もんだいでーた', () => {
@@ -53,6 +53,13 @@ describe('きろく', () => {
     const choice = {level:1 as const,set:'あ',random:false,mode:'challenge' as const}
     expect(resultStars(choice, {misses:1,seconds:8})).toEqual(['speed'])
     expect(resultStars({...choice, mode:'practice'}, {misses:0,seconds:1})).toEqual([])
+  })
+  it('けっかの ひょうじは もらえた バッジと つぎの もくひょうに あう', () => {
+    const choice = { level: 1 as const, set: 'あ', random: false, mode: 'challenge' as const }
+    expect(resultFeedback(choice, { misses: 0, seconds: 11 })).toContain('はやさ')
+    expect(resultFeedback(choice, { misses: 0, seconds: 8 })).toBe('バッジを 2こ ゲット！')
+    expect(resultFeedback(choice, { misses: 1, seconds: 8 })).toContain('まちがえなし')
+    expect(resultFeedback({ level: 4 as const, set: 'が', random: false, mode: 'challenge' as const }, { misses: 1, seconds: 1 })).toContain('まちがえなし')
   })
   it('けっかがめんの もんすうは えらんだ はんいと おなじ', () => {
     expect(questionCount({level:1,set:'や',random:false,mode:'challenge'})).toBe(3)

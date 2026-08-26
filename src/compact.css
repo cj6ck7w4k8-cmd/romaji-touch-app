@@ -456,9 +456,9 @@ button:disabled:focus-visible { outline-color: #9eaea8; }
   line-height: 1;
 }
 
-.home-logo b { color: #ef8870; font-size: 32px; }
+.home-logo b { color: #ef8870; font-size: 28px; }
 .home-logo span { color: #94aaa7; font-size: 15px; font-weight: 900; }
-.home-logo strong { color: #1c7f8e; font-size: 23px; }
+.home-logo strong { color: #1c7f8e; font-size: 27px; }
 
 .home-copy .lead { margin: 14px 0 22px; }
 
@@ -487,9 +487,9 @@ button:disabled:focus-visible { outline-color: #9eaea8; }
   .home-title-line { justify-content: flex-start; gap: 10px; }
   .home-title-line h1 { font-size: 34px; }
   .home-logo { gap: 4px; padding: 8px 9px; border-radius: 13px; }
-  .home-logo b { font-size: 26px; }
+  .home-logo b { font-size: 23px; }
   .home-logo span { font-size: 12px; }
-  .home-logo strong { font-size: 19px; }
+  .home-logo strong { font-size: 22px; }
   .home-copy .lead { margin: 12px 0 20px; text-align: left; }
   .home-start { align-items: stretch; }
   .home-start .next-stage { align-self: flex-start; }
@@ -503,9 +503,9 @@ button:disabled:focus-visible { outline-color: #9eaea8; }
   .home-title-line { gap: 10px; }
   .home-title-line h1 { font-size: 25px; line-height: 1.02; }
   .home-logo { gap: 4px; padding: 7px 9px; border-radius: 12px; }
-  .home-logo b { font-size: 24px; }
+  .home-logo b { font-size: 22px; }
   .home-logo span { font-size: 11px; }
-  .home-logo strong { font-size: 18px; }
+  .home-logo strong { font-size: 21px; }
   .home-copy .lead { margin: 3px 0 5px; font-size: 11px; }
   .home-start { gap: 3px; }
   .home-start .next-stage { padding: 4px 8px; font-size: 10px; }
