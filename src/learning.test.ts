@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { allKana, dakutenGroupNames, dakutenGroups, groupNames, kanaGroups, pairKana, pairs, shortWords, shuffle, voicedYouonGroupNames, voicedYouonGroups, youonGroupNames, youonGroups } from './data'
-import { currentLevelFor, finish, medalsFor, nextStageFor, progressBadges, questionCount, questionPool, resultFeedback, resultStars, stageStatus } from './App'
+import { bookRows, currentLevelFor, finish, medalsFor, nextStageFor, progressBadges, questionCount, questionPool, resultFeedback, resultStars, rowLabel, stageStatus } from './App'
 import { emptyProgress } from './storage'
 
 describe('もんだいでーた', () => {
@@ -26,6 +26,18 @@ describe('もんだいでーた', () => {
     expect(questionPool({ level: 4, set: 'が', random: false, mode: 'challenge' }).map(item => item.roma)).toEqual(['ga', 'gi', 'gu', 'ge', 'go'])
     expect(questionPool({ level: 5, set: 'しゃ', random: false, mode: 'challenge' }).map(item => item.roma)).toEqual(['sya', 'syu', 'syo'])
     expect(questionPool({ level: 8, set: 'words', random: true, mode: 'challenge' })).toEqual(shortWords)
+  })
+  it('レベル5と6は ぎょうぜんたいの もじで ひょうじする', () => {
+    expect(rowLabel(5, 'きゃ')).toBe('きゃきゅきょ')
+    expect(rowLabel(5, 'しゃ')).toBe('しゃしゅしょ')
+    expect(rowLabel(6, 'ぎゃ')).toBe('ぎゃぎゅぎょ')
+    expect(rowLabel(6, 'じゃ')).toBe('じゃじゅじょ')
+  })
+  it('いちらんは ぎょうの とちゅうで われない', () => {
+    expect(bookRows(1)[0].map(item => item.kana).join('')).toBe('あいうえおかきくけこ')
+    expect(bookRows(1)[1].map(item => item.kana).join('')).toBe('さしすせそたちつてと')
+    expect(bookRows(5)[0].map(item => item.kana).join('')).toBe('きゃきゅきょしゃしゅしょちゃちゅちょ')
+    expect(bookRows(6)[0].map(item => item.kana).join('')).toBe('ぎゃぎゅぎょじゃじゅじょ')
   })
 })
 

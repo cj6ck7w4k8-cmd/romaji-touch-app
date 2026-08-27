@@ -1,5 +1,9 @@
-/* いちらんは、横長の学習端末で一度に見渡せる表にする。 */
-.book-chart { grid-template-columns: repeat(10, minmax(0, 1fr)); }
+/* いちらんは、学ぶ行の途中で項目が分かれない表にする。 */
+.book-chart { direction: ltr; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.book-row { display: grid; width: 100%; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 7px; }
+.book-level-5 .book-row { grid-template-columns: repeat(9, minmax(0, 1fr)); }
+.book-level-6 .book-row { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+.book-row .kana-item { min-width: 0; }
 .level-row .level-picks { flex: 0 0 auto; }
 .level-row .unlock-note { flex: 1 1 auto; min-width: 0; margin: 0; padding: 0; }
 .status-marks { display: inline-flex; align-items: center; justify-content: center; gap: 3px; min-height: 16px; }
@@ -80,7 +84,9 @@
   .record-stage.completed { box-shadow: inset 0 -3px 0 #ffd5c1; }
   .record-time { font-size: 8px; }
   .record-page .reset-button { margin-top: 6px; }
-  .book-chart { grid-template-columns: repeat(5, minmax(0, 1fr)); padding: 12px; gap: 8px; }
+  .book-chart { padding: 12px; gap: 8px; }
+  .book-level-1 .book-row, .book-level-4 .book-row { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  .book-level-5 .book-row, .book-level-6 .book-row { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 
 @media (max-height: 400px) {
@@ -514,4 +520,31 @@ button:disabled:focus-visible { outline-color: #9eaea8; }
   .home-record, .home-medal { min-height: 50px; }
   .home-record-title, .home-medal > span { font-size: 10px; }
   .home-record-stats strong, .home-medal strong { font-size: 18px; }
+}
+
+/* 一覧は、学ぶまとまりを保ったまま左から右へ並べる。後続の共通グリッド指定より優先する。 */
+.book-chart.book-chart {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  align-content: center;
+  grid-template-columns: none;
+}
+.book-chart .book-row {
+  display: grid;
+  width: 100%;
+  grid-template-columns: repeat(10, minmax(0, 1fr));
+  gap: 7px;
+}
+.book-chart.book-level-5 .book-row { grid-template-columns: repeat(9, minmax(0, 1fr)); }
+.book-chart.book-level-6 .book-row { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+.book-chart .book-row .kana-item { min-width: 0; }
+
+@media (max-width: 720px) {
+  .book-chart .book-row { gap: 4px; }
+  .book-chart.book-level-1 .book-row,
+  .book-chart.book-level-4 .book-row { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  .book-chart.book-level-5 .book-row,
+  .book-chart.book-level-6 .book-row { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
